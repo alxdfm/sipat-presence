@@ -18,7 +18,7 @@ export default function DashboardContent({ participante }: Props) {
   const [presencas, setPresencas] = useState<PresencaEnriquecida[]>([])
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState(false)
-  const logout = useLogout()
+  const { logout, carregando: saindo } = useLogout()
 
   useEffect(() => {
     fetch('/api/presenca/minhas')
@@ -39,8 +39,12 @@ export default function DashboardContent({ participante }: Props) {
             <h1 className="text-2xl font-bold text-blue-900">Meu Dashboard</h1>
             <p className="text-gray-500 text-sm">{participante?.email}</p>
           </div>
-          <button onClick={logout} className="text-sm text-gray-500 hover:text-gray-700">
-            Sair
+          <button
+            onClick={logout}
+            disabled={saindo}
+            className="text-sm text-gray-500 hover:text-gray-700 disabled:opacity-50"
+          >
+            {saindo ? 'Saindo...' : 'Sair'}
           </button>
         </div>
 
