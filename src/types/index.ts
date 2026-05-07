@@ -99,6 +99,19 @@ export interface AtivarCodigoDoDiaPayload {
 }
 
 /**
+ * Participante com seu status de presença em um DiaDeEvento específico.
+ * Retornado por `GET /api/dia-de-evento/[id]/participantes`.
+ *
+ * @property presenca - null se o Participante não compareceu neste dia.
+ */
+export interface ParticipanteComPresenca {
+  id: string
+  nome: string | null
+  email: string
+  presenca: { id: string; registrada_em: string } | null
+}
+
+/**
  * Presença enriquecida com dados do DiaDeEvento e Evento — shape retornado por
  * `GET /api/presenca/minhas`. Usado no Dashboard e na geração do Certificado.
  *
