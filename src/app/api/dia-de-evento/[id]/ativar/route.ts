@@ -46,6 +46,24 @@ export async function PATCH(
     )
   }
 
+  // Busca o DiaDeEvento para verificar se a data já passou
+  const { data: diaAtual } = await auth.supabase
+    .from('dias_de_evento')
+    .select('data')
+    .eq('id', id)
+    .single()
+
+  if (!diaAtual) {
+    return NextResponse.json({ erro: 'dia_nao_encontrado' }, { status: 404 })
+  }
+
+  const hoje = new Date()
+  const hojeStr = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`
+
+  if (diaAtual.data < hojeStr) {
+    return NextResponse.json({ erro: 'dia_no_passado' }, { status: 422 })
+  }
+
   const { data: dia, error } = await auth.supabase
     .from('dias_de_evento')
     .update({ codigo_do_dia: codigo })
