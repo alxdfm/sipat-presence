@@ -169,3 +169,14 @@ export interface ColaboradorAutorizado {
   email: string
   criado_em: string
 }
+
+/**
+ * Dados necessários para gerar o certificado de um único dia de participação.
+ */
+export interface DadosCertificadoDia {
+  nomeParticipante: string
+  emailParticipante: string
+  nomeEvento: string
+  nomeDia: string | null
+  dataDia: string // "YYYY-MM-DD"
+}

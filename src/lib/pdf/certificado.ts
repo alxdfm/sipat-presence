@@ -1,5 +1,5 @@
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib'
-import { DadosCertificado } from '@/types'
+import { DadosCertificado, DadosCertificadoDia } from '@/types'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
@@ -80,6 +80,60 @@ export async function gerarCertificado(dados: DadosCertificado): Promise<Uint8Ar
     page.drawText(marcador, { x: colX, y: lineY, size: 12, font: helveticaBold, color: cor })
     page.drawText(texto, { x: colX + 18, y: lineY, size: 11, font: helvetica, color: cinzaEscuro })
   })
+
+  // Data de emissão
+  const dataEmissao = format(new Date(), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
+  page.drawText(`Emitido em ${dataEmissao}`, { x: 60, y: 50, size: 10, font: helvetica, color: cinzaClaro })
+
+  return pdfDoc.save()
+}
+
+/**
+ * Gera certificado de participação em um único dia do evento.
+ */
+export async function gerarCertificadoDia(dados: DadosCertificadoDia): Promise<Uint8Array> {
+  const pdfDoc = await PDFDocument.create()
+  const page = pdfDoc.addPage([842, 595]) // A4 landscape
+
+  const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
+  const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica)
+
+  const { width, height } = page.getSize()
+  const azulEscuro = rgb(0.1, 0.2, 0.5)
+  const cinzaEscuro = rgb(0.3, 0.3, 0.3)
+  const cinzaClaro = rgb(0.7, 0.7, 0.7)
+  const verde = rgb(0.1, 0.6, 0.2)
+
+  // Bordas decorativas
+  page.drawRectangle({ x: 20, y: 20, width: width - 40, height: height - 40, borderColor: azulEscuro, borderWidth: 3 })
+  page.drawRectangle({ x: 28, y: 28, width: width - 56, height: height - 56, borderColor: cinzaClaro, borderWidth: 1 })
+
+  // Título
+  page.drawText('CERTIFICADO DE PARTICIPACAO', {
+    x: 60, y: height - 100, size: 28, font: helveticaBold, color: azulEscuro,
+  })
+
+  // Nome do evento
+  page.drawText(dados.nomeEvento, {
+    x: 60, y: height - 130, size: 16, font: helvetica, color: cinzaEscuro,
+  })
+
+  page.drawLine({ start: { x: 60, y: height - 148 }, end: { x: width - 60, y: height - 148 }, thickness: 1, color: cinzaClaro })
+
+  // Participante
+  page.drawText('Certificamos que', { x: 60, y: height - 185, size: 12, font: helvetica, color: cinzaEscuro })
+  page.drawText(dados.nomeParticipante, { x: 60, y: height - 215, size: 24, font: helveticaBold, color: azulEscuro })
+  page.drawText(`(${dados.emailParticipante})`, { x: 60, y: height - 240, size: 11, font: helvetica, color: cinzaEscuro })
+
+  page.drawLine({ start: { x: 60, y: height - 265 }, end: { x: width - 60, y: height - 265 }, thickness: 0.5, color: cinzaClaro })
+
+  // Dia participado
+  const nomeDia = dados.nomeDia ?? 'Dia do evento'
+  const dataFormatada = formatarDataCertificado(dados.dataDia)
+
+  page.drawText('participou de', { x: 60, y: height - 300, size: 13, font: helvetica, color: cinzaEscuro })
+  page.drawText(nomeDia, { x: 60, y: height - 328, size: 20, font: helveticaBold, color: verde })
+  page.drawText(dataFormatada, { x: 60, y: height - 355, size: 14, font: helvetica, color: cinzaEscuro })
 
   // Data de emissão
   const dataEmissao = format(new Date(), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
