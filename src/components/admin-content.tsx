@@ -10,7 +10,6 @@ import QrCodeDisplay from './qr-code-display'
 import ParticipantesDia from './participantes-dia'
 import { useLogout } from '@/hooks/use-logout'
 
-/** Quantos DiaDeEvento exibir por vez antes de paginar. */
 const DIAS_POR_PAGINA = 5
 
 interface EventoComDias extends Evento {
@@ -22,18 +21,9 @@ interface Props {
   eventos: EventoComDias[]
 }
 
-/**
- * Painel do Organizador.
- * Permite criar Eventos, adicionar DiaDeEvento, ativar CodigoDoDia,
- * visualizar QR codes, ver participantes por dia e acessar gestão de Participantes.
- *
- * A lista de dias é paginada (DIAS_POR_PAGINA) para não sobrecarregar a tela
- * em Eventos com muitos dias.
- */
 export default function AdminContent({ participante, eventos: eventosIniciais }: Props) {
   const [eventos, setEventos] = useState(eventosIniciais)
   const [diaQrAberto, setDiaQrAberto] = useState<string | null>(null)
-  /** Página atual de dias por evento: eventoId → página (base 0) */
   const [paginasDias, setPaginasDias] = useState<Record<string, number>>({})
   const { logout, carregando: saindo } = useLogout()
 
@@ -52,9 +42,7 @@ export default function AdminContent({ participante, eventos: eventosIniciais }:
   function handleDiaCriado(eventoId: string, novoDia: DiaDeEvento) {
     setEventos(prev =>
       prev.map(e =>
-        e.id === eventoId
-          ? { ...e, dias_de_evento: [...e.dias_de_evento, novoDia] }
-          : e
+        e.id === eventoId ? { ...e, dias_de_evento: [...e.dias_de_evento, novoDia] } : e
       )
     )
   }
@@ -63,9 +51,7 @@ export default function AdminContent({ participante, eventos: eventosIniciais }:
     setEventos(prev =>
       prev.map(e => ({
         ...e,
-        dias_de_evento: e.dias_de_evento.map(d =>
-          d.id === diaAtualizado.id ? diaAtualizado : d
-        ),
+        dias_de_evento: e.dias_de_evento.map(d => d.id === diaAtualizado.id ? diaAtualizado : d),
       }))
     )
   }
@@ -79,11 +65,11 @@ export default function AdminContent({ participante, eventos: eventosIniciais }:
             <p className="text-gray-500 text-sm">{participante.email}</p>
           </div>
           <div className="flex items-center gap-4">
-            <Link
-              href="/admin/participantes"
-              className="text-sm text-blue-600 hover:text-blue-800 font-medium"
-            >
-              Gerenciar participantes
+            <Link href="/admin/colaboradores" className="text-sm text-blue-600 hover:text-blue-800 font-medium">
+              Colaboradores
+            </Link>
+            <Link href="/admin/participantes" className="text-sm text-blue-600 hover:text-blue-800 font-medium">
+              Participantes
             </Link>
             <button
               onClick={logout}
@@ -121,6 +107,9 @@ export default function AdminContent({ participante, eventos: eventosIniciais }:
                   <div key={dia.id} className="border rounded-lg p-3">
                     <div className="flex justify-between items-center">
                       <div>
+                        {dia.nome && (
+                          <p className="font-semibold text-gray-800">{dia.nome}</p>
+                        )}
                         <p className="font-medium text-gray-700">{dia.data}</p>
                         <p className="text-sm text-gray-500">
                           Abertura: {dia.hora_abertura} · {dia.duracao_minutos} min
@@ -156,7 +145,6 @@ export default function AdminContent({ participante, eventos: eventosIniciais }:
                       </div>
                     )}
 
-                    {/* Lista de presentes/ausentes — só faz sentido após ativação */}
                     {dia.codigo_do_dia && (
                       <ParticipantesDia diaId={dia.id} />
                     )}
@@ -168,7 +156,6 @@ export default function AdminContent({ participante, eventos: eventosIniciais }:
                 )}
               </div>
 
-              {/* Paginação de dias */}
               {totalPaginas > 1 && (
                 <div className="flex items-center justify-between mb-4 px-1">
                   <button

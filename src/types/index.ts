@@ -13,6 +13,7 @@ export interface Evento {
  * Um dia específico dentro do Evento.
  * É a unidade de Presença — cada Participante registra presença por DiaDeEvento.
  *
+ * @property nome - Título descritivo do dia (ex: "Palestra sobre assédio").
  * @property codigo_do_dia - null até o Organizador ativar via /admin na manhã do evento.
  *   Quando null, o QR code não pode ser gerado nem exibido.
  * @property hora_abertura - Formato "HH:MM:SS". Início da JanelaDeTempo.
@@ -21,6 +22,7 @@ export interface Evento {
 export interface DiaDeEvento {
   id: string
   evento_id: string
+  nome: string | null
   data: string // formato ISO: "YYYY-MM-DD"
   hora_abertura: string // formato: "HH:MM:SS"
   duracao_minutos: number
@@ -86,6 +88,7 @@ export interface CriarEventoPayload {
  */
 export interface CriarDiaDeEventoPayload {
   eventoId: string
+  nome?: string
   data: string // "YYYY-MM-DD"
   horaAbertura: string // "HH:MM"
   duracaoMinutos?: number
@@ -113,7 +116,7 @@ export interface ParticipanteComPresenca {
 
 /**
  * Presença enriquecida com dados do DiaDeEvento e Evento — shape retornado por
- * `GET /api/presenca/minhas`. Usado no Dashboard e na geração do Certificado.
+ * `GET /api/presenca/minhas`. Usado no Dashboard.
  *
  * O campo `codigo_do_dia` é omitido propositalmente — Participantes não devem ter
  * acesso ao código fora do QR code.
@@ -123,6 +126,7 @@ export interface PresencaEnriquecida {
   registrada_em: string
   dia_de_evento: {
     id: string
+    nome: string | null
     data: string
     hora_abertura: string
     evento: {
@@ -134,15 +138,34 @@ export interface PresencaEnriquecida {
 }
 
 /**
+ * Dia de evento com flag de presença do participante.
+ * Usado no Certificado para exibir todos os dias com ✓/✗.
+ */
+export interface DiaCertificado {
+  data: string
+  nome: string | null
+  presente: boolean
+}
+
+/**
  * Dados necessários para gerar o Certificado em PDF.
+ * Inclui todos os dias do evento (presentes e ausentes).
  */
 export interface DadosCertificado {
   nomeParticipante: string
   emailParticipante: string
   nomeEvento: string
-  presencas: Array<{
-    data: string // "YYYY-MM-DD"
-    registrada_em: string
-  }>
+  dias: DiaCertificado[]
+  diasPresentes: number
   totalDias: number
+}
+
+/**
+ * Colaborador com email autorizado a registrar presença.
+ * Gerenciado pelo Organizador via /admin/colaboradores.
+ */
+export interface ColaboradorAutorizado {
+  id: string
+  email: string
+  criado_em: string
 }

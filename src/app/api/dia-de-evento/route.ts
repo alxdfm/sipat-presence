@@ -22,13 +22,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ erro: 'corpo_invalido' }, { status: 400 })
   }
 
-  const { eventoId, data, horaAbertura, duracaoMinutos = 60 } = body
+  const { eventoId, nome, data, horaAbertura, duracaoMinutos = 60 } = body
 
   if (!eventoId || !data || !horaAbertura) {
     return NextResponse.json({ erro: 'campos_obrigatorios' }, { status: 400 })
   }
 
-  // Verifica se o Evento existe antes de tentar inserir (FK error seria 500 genérico)
   const { data: evento } = await auth.supabase
     .from('eventos')
     .select('id')
@@ -43,6 +42,7 @@ export async function POST(request: NextRequest) {
     .from('dias_de_evento')
     .insert({
       evento_id: eventoId,
+      nome: nome?.trim() || null,
       data,
       hora_abertura: horaAbertura,
       duracao_minutos: duracaoMinutos,

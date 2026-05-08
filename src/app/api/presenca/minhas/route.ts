@@ -5,13 +5,8 @@ import { autenticarUsuario } from '@/lib/supabase/api-helpers'
  * GET /api/presenca/minhas
  *
  * Retorna todas as Presenças do Participante autenticado,
- * enriquecidas com dados do DiaDeEvento e Evento vinculado.
- * Usado para montar o Dashboard e gerar o Certificado.
- *
- * O `codigo_do_dia` é excluído explicitamente da seleção — Participantes
- * não devem ter acesso ao código fora do QR code.
- *
- * @returns `{ presencas: PresencaEnriquecida[] }` ordenadas por data crescente.
+ * enriquecidas com dados do DiaDeEvento (incluindo nome) e Evento vinculado.
+ * Usado para montar o Dashboard.
  */
 export async function GET() {
   const auth = await autenticarUsuario()
@@ -24,6 +19,7 @@ export async function GET() {
       registrada_em,
       dia_de_evento:dias_de_evento (
         id,
+        nome,
         data,
         hora_abertura,
         evento:eventos ( id, nome, descricao )

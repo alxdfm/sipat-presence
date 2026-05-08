@@ -3,12 +3,6 @@ import { DadosCertificado } from '@/types'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
-/**
- * Formata uma data ISO para exibição no Certificado.
- *
- * @param dataIso - Data no formato "YYYY-MM-DD".
- * @returns Data formatada em português, ex: "07 de maio de 2026".
- */
 function formatarDataCertificado(dataIso: string): string {
   const [ano, mes, dia] = dataIso.split('-').map(Number)
   const data = new Date(ano, mes - 1, dia)
@@ -22,22 +16,9 @@ function formatarDataCertificado(dataIso: string): string {
  * O Certificado inclui:
  * - Nome e email do Participante
  * - Nome do Evento
- * - Lista de dias com Presença registrada
- * - Total de dias participados
+ * - Todos os dias do evento com indicação de presença (✓) ou ausência (✗)
+ * - Total de dias presentes / total de dias
  * - Data de geração
- *
- * @param dados - Dados do Participante, Evento e Presenças para montar o certificado.
- * @returns Promise com o Uint8Array do arquivo PDF gerado.
- * @throws {Error} Se a geração do PDF falhar por qualquer motivo interno do pdf-lib.
- * @example
- * const pdfBytes = await gerarCertificado({
- *   nomeParticipante: 'João Silva',
- *   emailParticipante: 'joao@empresa.com',
- *   nomeEvento: 'SIPAT 2026',
- *   presencas: [{ data: '2026-05-07', registrada_em: '2026-05-07T08:15:00Z' }],
- *   totalDias: 1,
- * })
- * // Use para download: URL.createObjectURL(new Blob([pdfBytes], { type: 'application/pdf' }))
  */
 export async function gerarCertificado(dados: DadosCertificado): Promise<Uint8Array> {
   const pdfDoc = await PDFDocument.create()
@@ -50,120 +31,67 @@ export async function gerarCertificado(dados: DadosCertificado): Promise<Uint8Ar
   const azulEscuro = rgb(0.1, 0.2, 0.5)
   const cinzaEscuro = rgb(0.3, 0.3, 0.3)
   const cinzaClaro = rgb(0.7, 0.7, 0.7)
+  const verde = rgb(0.1, 0.6, 0.2)
+  const vermelho = rgb(0.7, 0.1, 0.1)
 
-  // Borda decorativa
-  page.drawRectangle({
-    x: 20, y: 20,
-    width: width - 40, height: height - 40,
-    borderColor: azulEscuro,
-    borderWidth: 3,
-  })
-  page.drawRectangle({
-    x: 28, y: 28,
-    width: width - 56, height: height - 56,
-    borderColor: cinzaClaro,
-    borderWidth: 1,
-  })
+  // Bordas decorativas
+  page.drawRectangle({ x: 20, y: 20, width: width - 40, height: height - 40, borderColor: azulEscuro, borderWidth: 3 })
+  page.drawRectangle({ x: 28, y: 28, width: width - 56, height: height - 56, borderColor: cinzaClaro, borderWidth: 1 })
 
   // Título
   page.drawText('CERTIFICADO DE PARTICIPACAO', {
-    x: 60, y: height - 100,
-    size: 28,
-    font: helveticaBold,
-    color: azulEscuro,
+    x: 60, y: height - 100, size: 28, font: helveticaBold, color: azulEscuro,
   })
 
-  // Subtítulo (nome do evento)
+  // Nome do evento
   page.drawText(dados.nomeEvento, {
-    x: 60, y: height - 135,
-    size: 16,
-    font: helvetica,
-    color: cinzaEscuro,
+    x: 60, y: height - 130, size: 16, font: helvetica, color: cinzaEscuro,
   })
 
-  // Linha separadora
-  page.drawLine({
-    start: { x: 60, y: height - 150 },
-    end: { x: width - 60, y: height - 150 },
-    thickness: 1,
-    color: cinzaClaro,
-  })
+  page.drawLine({ start: { x: 60, y: height - 148 }, end: { x: width - 60, y: height - 148 }, thickness: 1, color: cinzaClaro })
 
-  // Texto principal
-  page.drawText('Certificamos que', {
-    x: 60, y: height - 190,
-    size: 12,
-    font: helvetica,
-    color: cinzaEscuro,
-  })
-
-  page.drawText(dados.nomeParticipante, {
-    x: 60, y: height - 215,
-    size: 20,
-    font: helveticaBold,
-    color: azulEscuro,
-  })
-
-  page.drawText(`(${dados.emailParticipante})`, {
-    x: 60, y: height - 238,
-    size: 11,
-    font: helvetica,
-    color: cinzaEscuro,
-  })
+  // Participante
+  page.drawText('Certificamos que', { x: 60, y: height - 180, size: 12, font: helvetica, color: cinzaEscuro })
+  page.drawText(dados.nomeParticipante, { x: 60, y: height - 205, size: 20, font: helveticaBold, color: azulEscuro })
+  page.drawText(`(${dados.emailParticipante})`, { x: 60, y: height - 225, size: 11, font: helvetica, color: cinzaEscuro })
 
   page.drawText(
-    `participou de ${dados.totalDias} dia${dados.totalDias > 1 ? 's' : ''} do evento.`,
-    {
-      x: 60, y: height - 265,
-      size: 12,
-      font: helvetica,
-      color: cinzaEscuro,
-    }
+    `participou de ${dados.diasPresentes} de ${dados.totalDias} dia${dados.totalDias !== 1 ? 's' : ''} do evento.`,
+    { x: 60, y: height - 252, size: 12, font: helvetica, color: cinzaEscuro }
   )
 
-  // Lista de presenças
-  page.drawText('Dias com presenca registrada:', {
-    x: 60, y: height - 300,
-    size: 11,
-    font: helveticaBold,
-    color: cinzaEscuro,
-  })
+  // Linha separadora antes dos dias
+  page.drawLine({ start: { x: 60, y: height - 268 }, end: { x: width / 2 - 20, y: height - 268 }, thickness: 0.5, color: cinzaClaro })
 
-  dados.presencas.forEach((p, index) => {
-    page.drawText(`- ${formatarDataCertificado(p.data)}`, {
-      x: 75, y: height - 320 - index * 18,
-      size: 11,
-      font: helvetica,
-      color: cinzaEscuro,
-    })
+  // Lista de dias com presença/ausência (duas colunas se mais de 4 dias)
+  const COL1_X = 60
+  const COL2_X = width / 2
+  const START_Y = height - 290
+  const LINE_H = 22
+
+  dados.dias.forEach((dia, i) => {
+    const colX = i < 4 ? COL1_X : COL2_X
+    const lineY = START_Y - (i % 4) * LINE_H
+    const marcador = dia.presente ? '[+]' : '[ ]'
+    const cor = dia.presente ? verde : vermelho
+    const nomeDia = dia.nome ? `${dia.nome} — ` : ''
+    const texto = `${nomeDia}${formatarDataCertificado(dia.data)}`
+
+    page.drawText(marcador, { x: colX, y: lineY, size: 12, font: helveticaBold, color: cor })
+    page.drawText(texto, { x: colX + 18, y: lineY, size: 11, font: helvetica, color: cinzaEscuro })
   })
 
   // Data de emissão
   const dataEmissao = format(new Date(), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
-  page.drawText(`Emitido em ${dataEmissao}`, {
-    x: 60, y: 60,
-    size: 10,
-    font: helvetica,
-    color: cinzaClaro,
-  })
+  page.drawText(`Emitido em ${dataEmissao}`, { x: 60, y: 50, size: 10, font: helvetica, color: cinzaClaro })
 
   return pdfDoc.save()
 }
 
 /**
  * Inicia o download do Certificado PDF no browser.
- * Cria um link temporário, clica automaticamente e o remove.
- *
- * @param pdfBytes - Bytes do PDF gerado por `gerarCertificado`.
- * @param nomeArquivo - Nome sugerido para o arquivo. Padrão: "certificado-sipat.pdf".
- * @example
- * const bytes = await gerarCertificado(dados)
- * baixarCertificado(bytes, 'certificado-joao-silva.pdf')
  */
-export function baixarCertificado(
-  pdfBytes: Uint8Array,
-  nomeArquivo = 'certificado-sipat.pdf'
-): void {
+export function baixarCertificado(pdfBytes: Uint8Array, nomeArquivo = 'certificado-sipat.pdf'): void {
   const blob = new Blob([pdfBytes.buffer as ArrayBuffer], { type: 'application/pdf' })
   const url = URL.createObjectURL(blob)
   const link = document.createElement('a')

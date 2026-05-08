@@ -4,16 +4,12 @@ import { useEffect, useState } from 'react'
 import { Participante, PresencaEnriquecida } from '@/types'
 import CertificadoButton from './certificado-button'
 import { useLogout } from '@/hooks/use-logout'
+import { CardSkeleton } from './spinner'
 
 interface Props {
   participante: Participante | null
 }
 
-/**
- * Conteúdo do Dashboard do Participante.
- * Busca as Presenças registradas e exibe lista de dias participados.
- * Oferece o botão para gerarCertificado quando há pelo menos uma Presença.
- */
 export default function DashboardContent({ participante }: Props) {
   const [presencas, setPresencas] = useState<PresencaEnriquecida[]>([])
   const [carregando, setCarregando] = useState(true)
@@ -23,7 +19,7 @@ export default function DashboardContent({ participante }: Props) {
   useEffect(() => {
     fetch('/api/presenca/minhas')
       .then(r => {
-        if (!r.ok) throw new Error('Falha ao buscar presenças')
+        if (!r.ok) throw new Error()
         return r.json()
       })
       .then(d => setPresencas(d.presencas ?? []))
@@ -49,7 +45,7 @@ export default function DashboardContent({ participante }: Props) {
         </div>
 
         {carregando ? (
-          <p className="text-gray-400 text-center py-8">Carregando presenças...</p>
+          <CardSkeleton />
         ) : erro ? (
           <div className="bg-white rounded-xl p-8 text-center shadow-sm">
             <p className="text-red-500">Não foi possível carregar suas presenças.</p>
@@ -72,7 +68,9 @@ export default function DashboardContent({ participante }: Props) {
                 {presencas.map(p => (
                   <li key={p.id} className="p-4 flex justify-between items-center">
                     <div>
-                      <p className="font-medium text-gray-800">{p.dia_de_evento?.evento?.nome}</p>
+                      <p className="font-medium text-gray-800">
+                        {p.dia_de_evento?.nome ?? p.dia_de_evento?.evento?.nome}
+                      </p>
                       <p className="text-sm text-gray-500">{p.dia_de_evento?.data}</p>
                     </div>
                     <span className="text-green-600 text-sm font-medium">✓ Presente</span>

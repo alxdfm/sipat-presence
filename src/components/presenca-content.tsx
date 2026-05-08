@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import { createClientSupabase } from '@/lib/supabase/client'
 
 type Estado = 'verificando' | 'nao_autenticado' | 'registrando' | 'sucesso' | 'erro'
-type MotivoErro = 'codigo_incorreto' | 'fora_da_janela' | 'dia_nao_ativado' | 'dia_nao_encontrado' | 'erro_interno' | null
+type MotivoErro = 'codigo_incorreto' | 'fora_da_janela' | 'dia_nao_ativado' | 'dia_nao_encontrado' | 'email_nao_autorizado' | 'muitas_requisicoes' | 'erro_interno' | null
 
 /**
  * Componente client-side da pagina de registro de Presenca.
@@ -65,10 +65,12 @@ export default function PresencaContent() {
   }, [diaId, code, router])
 
   const mensagensErro: Record<string, string> = {
-    codigo_incorreto: 'Codigo do QR code invalido.',
-    fora_da_janela: 'O horario de registro de presenca ja encerrou ou ainda nao abriu.',
-    dia_nao_ativado: 'O codigo do dia ainda nao foi ativado pelo Organizador.',
-    dia_nao_encontrado: 'QR code invalido ou expirado.',
+    codigo_incorreto: 'Código do QR code inválido.',
+    fora_da_janela: 'O horário de registro de presença já encerrou ou ainda não abriu.',
+    dia_nao_ativado: 'O código do dia ainda não foi ativado pelo Organizador.',
+    dia_nao_encontrado: 'QR code inválido ou expirado.',
+    email_nao_autorizado: 'Seu e-mail não está na lista de colaboradores autorizados. Entre em contato com o organizador.',
+    muitas_requisicoes: 'Muitas tentativas. Aguarde um momento e tente novamente.',
     erro_interno: 'Erro interno. Tente novamente.',
   }
 

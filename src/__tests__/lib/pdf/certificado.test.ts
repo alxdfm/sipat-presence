@@ -6,11 +6,13 @@ const dadosTeste: DadosCertificado = {
   nomeParticipante: 'Joao Silva',
   emailParticipante: 'joao@empresa.com',
   nomeEvento: 'SIPAT 2026',
-  presencas: [
-    { data: '2026-05-07', registrada_em: '2026-05-07T08:15:00Z' },
-    { data: '2026-05-08', registrada_em: '2026-05-08T08:20:00Z' },
+  dias: [
+    { data: '2026-05-07', nome: 'Palestra sobre assedio', presente: true },
+    { data: '2026-05-08', nome: 'Dinamica de seguranca', presente: true },
+    { data: '2026-05-09', nome: 'Encerramento', presente: false },
   ],
-  totalDias: 2,
+  diasPresentes: 2,
+  totalDias: 3,
 }
 
 describe('gerarCertificado', () => {
@@ -26,10 +28,11 @@ describe('gerarCertificado', () => {
     expect(header).toBe('%PDF')
   })
 
-  it('gera PDF com apenas 1 presenca', async () => {
+  it('gera PDF com apenas 1 dia presente', async () => {
     const dadosUmDia: DadosCertificado = {
       ...dadosTeste,
-      presencas: [{ data: '2026-05-07', registrada_em: '2026-05-07T08:15:00Z' }],
+      dias: [{ data: '2026-05-07', nome: 'Palestra', presente: true }],
+      diasPresentes: 1,
       totalDias: 1,
     }
     const bytes = await gerarCertificado(dadosUmDia)
@@ -50,5 +53,18 @@ describe('gerarCertificado', () => {
       nomeEvento: 'SIPAT - Semana Interna de Prevencao de Acidentes do Trabalho 2026 Edicao Especial',
     }
     await expect(gerarCertificado(dadosNomeLongo)).resolves.toBeInstanceOf(Uint8Array)
+  })
+
+  it('gera PDF com dias sem nome', async () => {
+    const dadosSemNomeDia: DadosCertificado = {
+      ...dadosTeste,
+      dias: [
+        { data: '2026-05-07', nome: null, presente: true },
+        { data: '2026-05-08', nome: null, presente: false },
+      ],
+      diasPresentes: 1,
+      totalDias: 2,
+    }
+    await expect(gerarCertificado(dadosSemNomeDia)).resolves.toBeInstanceOf(Uint8Array)
   })
 })
