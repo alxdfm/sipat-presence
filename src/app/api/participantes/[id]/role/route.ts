@@ -36,7 +36,19 @@ export async function PATCH(
     return NextResponse.json({ erro: 'role_invalido' }, { status: 400 })
   }
 
-  const { data: participante, error } = await createAdminSupabase()
+  const admin = createAdminSupabase()
+
+  const { data: participanteAtual } = await admin
+    .from('participantes')
+    .select('role')
+    .eq('id', id)
+    .single()
+
+  if (!participanteAtual) {
+    return NextResponse.json({ erro: 'participante_nao_encontrado' }, { status: 404 })
+  }
+
+  const { data: participante, error } = await admin
     .from('participantes')
     .update({ role: body.role })
     .eq('id', id)
@@ -49,6 +61,14 @@ export async function PATCH(
     }
     return NextResponse.json({ erro: 'erro_interno' }, { status: 500 })
   }
+
+  // Registra no histórico (falha silenciosa para não bloquear a resposta)
+  await admin.from('historico_roles').insert({
+    participante_id: id,
+    role_anterior: participanteAtual.role,
+    role_novo: body.role,
+    alterado_por_id: auth.usuario.id,
+  })
 
   return NextResponse.json({ participante })
 }

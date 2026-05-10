@@ -5,6 +5,7 @@ import { DiaDeEvento } from '@/types'
 const diaBase: DiaDeEvento = {
   id: 'dia-1',
   evento_id: 'evento-1',
+  nome: null,
   data: '2026-05-07',
   hora_abertura: '08:00:00',
   duracao_minutos: 60,

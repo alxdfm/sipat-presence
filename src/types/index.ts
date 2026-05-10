@@ -180,3 +180,53 @@ export interface DadosCertificadoDia {
   nomeDia: string | null
   dataDia: string // "YYYY-MM-DD"
 }
+
+/**
+ * Payload para editar um Evento existente via PATCH /api/evento/[id].
+ */
+export interface AtualizarEventoPayload {
+  nome?: string
+  descricao?: string | null
+}
+
+/**
+ * Payload para editar um DiaDeEvento via PATCH /api/dia-de-evento/[id].
+ */
+export interface AtualizarDiaDeEventoPayload {
+  nome?: string | null
+  data?: string
+  horaAbertura?: string
+  duracaoMinutos?: number
+}
+
+/**
+ * Estatísticas de presença de um DiaDeEvento.
+ * Retornado por GET /api/relatorios/estatisticas.
+ */
+export interface EstatisticasDia {
+  diaId: string
+  dataDia: string
+  nomeDia: string | null
+  eventoId: string
+  nomeEvento: string
+  totalPresentes: number
+  totalColaboradores: number
+  percentual: number | null
+}
+
+/**
+ * Entrada do histórico de alterações de role.
+ * Retornado por GET /api/relatorios/historico-roles.
+ */
+export interface HistoricoRole {
+  id: string
+  roleAnterior: 'participante' | 'organizador'
+  roleNovo: 'participante' | 'organizador'
+  alteradoEm: string
+  participanteId: string | null
+  nomeParticipante: string | null
+  emailParticipante: string
+  alteradoPorId: string | null
+  nomeAlteradoPor: string | null
+  emailAlteradoPor: string
+}

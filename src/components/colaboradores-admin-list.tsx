@@ -14,6 +14,9 @@ export default function ColaboradoresAdminList({ colaboradoresIniciais }: Props)
   const [textoEmails, setTextoEmails] = useState('')
   const [adicionando, setAdicionando] = useState(false)
   const [removendo, setRemovendo] = useState<string | null>(null)
+  const [editandoId, setEditandoId] = useState<string | null>(null)
+  const [editEmail, setEditEmail] = useState('')
+  const [salvandoId, setSalvandoId] = useState<string | null>(null)
   const { showToast } = useToast()
 
   async function handleAdicionar(e: FormEvent) {
@@ -38,7 +41,6 @@ export default function ColaboradoresAdminList({ colaboradoresIniciais }: Props)
         return
       }
 
-      // Rebusca a lista atualizada
       const resLista = await fetch('/api/colaboradores-autorizados')
       const jsonLista = await resLista.json()
       setColaboradores(jsonLista.colaboradores ?? [])
@@ -67,6 +69,43 @@ export default function ColaboradoresAdminList({ colaboradoresIniciais }: Props)
       showToast('Erro de conexão.', 'error')
     } finally {
       setRemovendo(null)
+    }
+  }
+
+  function abrirEdicao(c: ColaboradorAutorizado) {
+    setEditandoId(c.id)
+    setEditEmail(c.email)
+  }
+
+  async function salvarEdicao(id: string) {
+    const email = editEmail.trim().toLowerCase()
+    if (!email || !email.includes('@')) {
+      showToast('E-mail inválido.', 'error')
+      return
+    }
+    setSalvandoId(id)
+    try {
+      const res = await fetch(`/api/colaboradores-autorizados/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      })
+      const json = await res.json()
+      if (!res.ok) {
+        if (json.erro === 'email_ja_cadastrado') {
+          showToast('Esse e-mail já está na lista.', 'error')
+        } else {
+          showToast('Erro ao atualizar e-mail.', 'error')
+        }
+        return
+      }
+      setColaboradores(prev => prev.map(c => c.id === id ? json.colaborador : c))
+      setEditandoId(null)
+      showToast('E-mail atualizado.', 'success')
+    } catch {
+      showToast('Erro de conexão.', 'error')
+    } finally {
+      setSalvandoId(null)
     }
   }
 
@@ -105,15 +144,51 @@ export default function ColaboradoresAdminList({ colaboradoresIniciais }: Props)
         ) : (
           <ul className="divide-y border rounded-lg overflow-hidden">
             {colaboradores.map(c => (
-              <li key={c.id} className="flex items-center justify-between px-4 py-3 bg-white hover:bg-gray-50">
-                <span className="text-sm text-gray-800">{c.email}</span>
-                <button
-                  onClick={() => handleRemover(c.id, c.email)}
-                  disabled={removendo === c.id}
-                  className="text-sm text-red-500 hover:text-red-700 disabled:opacity-50 ml-4"
-                >
-                  {removendo === c.id ? 'Removendo...' : 'Remover'}
-                </button>
+              <li key={c.id} className="px-4 py-3 bg-white hover:bg-gray-50">
+                {editandoId === c.id ? (
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="email"
+                      value={editEmail}
+                      onChange={e => setEditEmail(e.target.value)}
+                      className="flex-1 border rounded-lg px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      autoFocus
+                    />
+                    <button
+                      onClick={() => salvarEdicao(c.id)}
+                      disabled={salvandoId === c.id}
+                      className="text-sm bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-1"
+                    >
+                      {salvandoId === c.id && <Spinner size="sm" className="border-white border-t-transparent" />}
+                      Salvar
+                    </button>
+                    <button
+                      onClick={() => setEditandoId(null)}
+                      className="text-sm text-gray-500 hover:text-gray-700"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-800">{c.email}</span>
+                    <div className="flex gap-3 ml-4">
+                      <button
+                        onClick={() => abrirEdicao(c)}
+                        className="text-sm text-blue-600 hover:text-blue-800"
+                      >
+                        Editar
+                      </button>
+                      <button
+                        onClick={() => handleRemover(c.id, c.email)}
+                        disabled={removendo === c.id}
+                        className="text-sm text-red-500 hover:text-red-700 disabled:opacity-50"
+                      >
+                        {removendo === c.id ? 'Removendo...' : 'Remover'}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </li>
             ))}
           </ul>
