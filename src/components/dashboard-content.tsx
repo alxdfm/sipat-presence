@@ -52,13 +52,21 @@ export default function DashboardContent({ participante }: Props) {
               <p className="text-gray-500 text-sm">{participante?.email}</p>
             </div>
           </div>
-          <button
-            onClick={logout}
-            disabled={saindo}
-            className="text-sm text-gray-500 hover:text-gray-700 disabled:opacity-50"
-          >
-            {saindo ? 'Saindo...' : 'Sair'}
-          </button>
+          <div className="flex items-center gap-4">
+            <a
+              href="/codigo"
+              className="text-sm text-blue-700 hover:text-blue-900 font-medium"
+            >
+              Inserir código
+            </a>
+            <button
+              onClick={logout}
+              disabled={saindo}
+              className="text-sm text-gray-500 hover:text-gray-700 disabled:opacity-50"
+            >
+              {saindo ? 'Saindo...' : 'Sair'}
+            </button>
+          </div>
         </div>
 
         {carregando ? (

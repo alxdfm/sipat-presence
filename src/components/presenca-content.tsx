@@ -104,10 +104,13 @@ export default function PresencaContent() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </div>
-            <h2 className="text-xl font-bold text-red-700 mb-2">Nao foi possivel registrar</h2>
-            <p className="text-gray-500 text-sm mb-6">
+            <h2 className="text-xl font-bold text-red-700 mb-2">Não foi possível registrar</h2>
+            <p className="text-gray-500 text-sm mb-4">
               {motivoErro ? mensagensErro[motivoErro] ?? 'Erro desconhecido.' : 'Erro desconhecido.'}
             </p>
+            <a href="/codigo" className="block w-full bg-blue-700 text-white py-2 px-4 rounded-lg hover:bg-blue-800 transition-colors mb-3">
+              Inserir código manualmente
+            </a>
             <a href="/dashboard" className="block w-full border border-gray-300 text-gray-600 py-2 px-4 rounded-lg hover:bg-gray-50 transition-colors">
               Ir para o dashboard
             </a>

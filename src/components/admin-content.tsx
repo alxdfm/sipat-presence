@@ -61,6 +61,13 @@ export default function AdminContent({ participante, eventos: eventosIniciais }:
   // estado de exclusão de dia
   const [diaExcluindo, setDiaExcluindo] = useState<string | null>(null)
   const [excluindoDia, setExcluindoDia] = useState(false)
+  const [diaCopiado, setDiaCopiado] = useState<string | null>(null)
+
+  function copiarCodigo(diaId: string, codigo: string) {
+    navigator.clipboard.writeText(codigo)
+    setDiaCopiado(diaId)
+    setTimeout(() => setDiaCopiado(null), 2000)
+  }
 
   function paginaAtual(eventoId: string) {
     return paginasDias[eventoId] ?? 0
@@ -414,7 +421,27 @@ export default function AdminContent({ participante, eventos: eventosIniciais }:
                             </p>
                             <p className="text-sm mt-1">
                               {dia.codigo_do_dia
-                                ? <span className="text-green-600 font-medium">✓ Ativado</span>
+                                ? (
+                                  <span className="inline-flex items-center gap-2">
+                                    <span className="text-green-600 font-medium">✓ Ativado</span>
+                                    <span className="font-mono text-gray-700 bg-gray-100 px-2 py-0.5 rounded text-xs">{dia.codigo_do_dia}</span>
+                                    <button
+                                      onClick={() => copiarCodigo(dia.id, dia.codigo_do_dia!)}
+                                      title="Copiar código"
+                                      className={`transition-colors ${diaCopiado === dia.id ? 'text-green-600' : 'text-gray-400 hover:text-gray-700'}`}
+                                    >
+                                      {diaCopiado === dia.id ? (
+                                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                        </svg>
+                                      ) : (
+                                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                        </svg>
+                                      )}
+                                    </button>
+                                  </span>
+                                )
                                 : <span className="text-yellow-600">Aguardando ativação</span>
                               }
                             </p>
