@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { autenticarUsuario } from '@/lib/supabase/api-helpers'
+import { autenticarUsuario, logErro} from '@/lib/supabase/api-helpers'
 
 /**
  * GET /api/presenca/minhas
@@ -29,6 +29,7 @@ export async function GET() {
     .order('registrada_em', { ascending: true })
 
   if (error) {
+    logErro('/presenca/minhas', error)
     return NextResponse.json({ erro: 'erro_interno' }, { status: 500 })
   }
 

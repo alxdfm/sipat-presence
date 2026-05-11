@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { autenticarUsuario, verificarOrganizador } from '@/lib/supabase/api-helpers'
+import { autenticarUsuario, verificarOrganizador, logErro} from '@/lib/supabase/api-helpers'
 import { AtualizarDiaDeEventoPayload } from '@/types'
 
 /**
@@ -112,6 +112,7 @@ export async function DELETE(
     .eq('id', id)
 
   if (error) {
+    logErro('/dia-de-evento/[id]', error)
     return NextResponse.json({ erro: 'erro_interno' }, { status: 500 })
   }
 

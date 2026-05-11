@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { verificarOrganizador } from '@/lib/supabase/api-helpers'
+import { verificarOrganizador, logErro} from '@/lib/supabase/api-helpers'
 import { createAdminSupabase } from '@/lib/supabase/server'
 
 /**

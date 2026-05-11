@@ -55,7 +55,7 @@ export default function AtivarCodigoForm({ diaId, onAtivado }: Props) {
         value={codigo}
         onChange={e => setCodigo(e.target.value)}
         placeholder="Digite o código do dia (ex: azul42)"
-        className="flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
+        className="flex-1 border rounded-lg px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-500"
         required
       />
       <button

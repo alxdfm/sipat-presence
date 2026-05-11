@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { autenticarUsuario } from '@/lib/supabase/api-helpers'
+import { autenticarUsuario, logErro} from '@/lib/supabase/api-helpers'
 
 /**
  * GET /api/certificado/[eventoId]
@@ -34,6 +34,7 @@ export async function GET(
     .order('data', { ascending: true })
 
   if (erroDias || !dias) {
+    logErro('/certificado/[eventoId]', erroDias)
     return NextResponse.json({ erro: 'erro_interno' }, { status: 500 })
   }
 

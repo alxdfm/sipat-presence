@@ -53,7 +53,7 @@ export default function EventoForm({ onEventoCriado }: Props) {
         value={nome}
         onChange={e => setNome(e.target.value)}
         placeholder="Nome do evento (ex: SIPAT 2026)"
-        className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="w-full border rounded-lg px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
         required
       />
       <input
@@ -61,7 +61,7 @@ export default function EventoForm({ onEventoCriado }: Props) {
         value={descricao}
         onChange={e => setDescricao(e.target.value)}
         placeholder="Descrição (opcional)"
-        className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="w-full border rounded-lg px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
       <button
         type="submit"

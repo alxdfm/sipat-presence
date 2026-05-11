@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { autenticarUsuario, verificarOrganizador } from '@/lib/supabase/api-helpers'
+import { autenticarUsuario, verificarOrganizador, logErro} from '@/lib/supabase/api-helpers'
 import { CriarEventoPayload } from '@/types'
 
 /**
@@ -19,6 +19,7 @@ export async function GET() {
     .order('criado_em', { ascending: false })
 
   if (error) {
+    logErro('/evento', error)
     return NextResponse.json({ erro: 'erro_interno' }, { status: 500 })
   }
 
@@ -54,6 +55,7 @@ export async function POST(request: NextRequest) {
     .single()
 
   if (error) {
+    logErro('/evento', error)
     return NextResponse.json({ erro: 'erro_interno' }, { status: 500 })
   }
 

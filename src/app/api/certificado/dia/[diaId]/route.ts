@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { autenticarUsuario } from '@/lib/supabase/api-helpers'
+import { autenticarUsuario, logErro} from '@/lib/supabase/api-helpers'
 
 /**
  * GET /api/certificado/dia/[diaId]

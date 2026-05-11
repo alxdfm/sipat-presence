@@ -121,7 +121,7 @@ export default function ColaboradoresAdminList({ colaboradoresIniciais }: Props)
             onChange={e => setTextoEmails(e.target.value)}
             placeholder={"Um ou mais e-mails (um por linha ou separados por vírgula):\njoao@empresa.com\nmaria@empresa.com"}
             rows={4}
-            className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            className="w-full border rounded-lg px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
           />
         </div>
         <button
@@ -151,7 +151,7 @@ export default function ColaboradoresAdminList({ colaboradoresIniciais }: Props)
                       type="email"
                       value={editEmail}
                       onChange={e => setEditEmail(e.target.value)}
-                      className="flex-1 border rounded-lg px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="flex-1 border rounded-lg px-2 py-1 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                       autoFocus
                     />
                     <button

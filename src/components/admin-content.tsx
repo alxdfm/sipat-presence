@@ -235,14 +235,14 @@ export default function AdminContent({ participante, eventos: eventosIniciais }:
                     value={editEventoNome}
                     onChange={e => setEditEventoNome(e.target.value)}
                     placeholder="Nome do evento"
-                    className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full border rounded-lg px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                   <input
                     type="text"
                     value={editEventoDescricao}
                     onChange={e => setEditEventoDescricao(e.target.value)}
                     placeholder="Descrição (opcional)"
-                    className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full border rounded-lg px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                   <div className="flex gap-2">
                     <button
@@ -319,27 +319,27 @@ export default function AdminContent({ participante, eventos: eventosIniciais }:
                           value={editDiaNome}
                           onChange={e => setEditDiaNome(e.target.value)}
                           placeholder="Nome do dia (opcional)"
-                          className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full border rounded-lg px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                         <div className="flex flex-wrap gap-2">
                           <input
                             type="date"
                             value={editDiaData}
                             onChange={e => setEditDiaData(e.target.value)}
-                            className="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="border rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             required
                           />
                           <input
                             type="time"
                             value={editDiaHora}
                             onChange={e => setEditDiaHora(e.target.value)}
-                            className="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="border rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             required
                           />
                           <select
                             value={editDiaDuracao}
                             onChange={e => setEditDiaDuracao(e.target.value)}
-                            className="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="border rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
                           >
                             <option value="30">30 min</option>
                             <option value="60">60 min</option>

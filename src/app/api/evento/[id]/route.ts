@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { verificarOrganizador } from '@/lib/supabase/api-helpers'
+import { verificarOrganizador, logErro} from '@/lib/supabase/api-helpers'
 
 /**
  * PATCH /api/evento/[id]
@@ -74,6 +74,7 @@ export async function DELETE(
     .eq('id', id)
 
   if (error) {
+    logErro('/evento/[id]', error)
     return NextResponse.json({ erro: 'erro_interno' }, { status: 500 })
   }
 

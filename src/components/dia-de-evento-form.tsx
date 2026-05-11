@@ -64,14 +64,14 @@ export default function DiaDeEventoForm({ eventoId, onDiaCriado }: Props) {
         value={nome}
         onChange={e => setNome(e.target.value)}
         placeholder="Nome do dia (ex: Palestra sobre assédio)"
-        className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="w-full border rounded-lg px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
       <div className="flex flex-wrap gap-2">
         <input
           type="date"
           value={data}
           onChange={e => setData(e.target.value)}
-          className="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="border rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
           required
         />
         <input
@@ -79,13 +79,13 @@ export default function DiaDeEventoForm({ eventoId, onDiaCriado }: Props) {
           value={horaAbertura}
           onChange={e => setHoraAbertura(e.target.value)}
           placeholder="Hora de abertura"
-          className="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="border rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
           required
         />
         <select
           value={duracaoMinutos}
           onChange={e => setDuracaoMinutos(e.target.value)}
-          className="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="border rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="30">30 min</option>
           <option value="60">60 min</option>

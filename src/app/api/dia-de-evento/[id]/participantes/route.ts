@@ -1,20 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { verificarOrganizador } from '@/lib/supabase/api-helpers'
+import { verificarOrganizador, logErro} from '@/lib/supabase/api-helpers'
 import { createAdminSupabase } from '@/lib/supabase/server'
 import { ParticipanteComPresenca } from '@/types'
 
 /**
  * GET /api/dia-de-evento/[id]/participantes
  *
- * Retorna todos os Participantes do sistema com seu status de presença
- * no DiaDeEvento especificado. Permite ao Organizador ver quem compareceu
- * e quem não compareceu.
- *
- * Usa service_role para ler todos os participantes — a RLS padrão restringe
- * cada participante a ver apenas o próprio registro.
+ * Retorna a lista de colaboradores autorizados com status de presença no dia.
+ * A base é `colaboradores_autorizados` — quem é esperado aparecer.
+ * Nome é preenchido se o colaborador já fez login (existe em `participantes`).
  *
  * @param params.id - ID do DiaDeEvento.
- * @returns `{ participantes: ParticipanteComPresenca[], totalPresentes: number, totalAusentes: number }`
+ * @returns `{ participantes: ParticipanteComPresenca[], totalPresentes, totalAusentes }`
  */
 export async function GET(
   _request: NextRequest,
@@ -24,31 +21,43 @@ export async function GET(
   const auth = await verificarOrganizador()
   if (!auth.ok) return auth.response
 
-  const adminSupabase = createAdminSupabase()
+  const admin = createAdminSupabase()
 
-  const [{ data: participantes, error: erroP }, { data: presencas, error: erroR }] =
-    await Promise.all([
-      adminSupabase
-        .from('participantes')
-        .select('id, nome, email')
-        .order('nome', { ascending: true }),
-      adminSupabase
-        .from('presencas')
-        .select('id, participante_id, registrada_em')
-        .eq('dia_de_evento_id', id),
-    ])
+  const [
+    { data: colaboradores, error: erroC },
+    { data: presencas, error: erroP },
+    { data: participantes, error: erroR },
+  ] = await Promise.all([
+    admin.from('colaboradores_autorizados').select('id, email').order('email'),
+    admin.from('presencas').select('participante_id, id, registrada_em').eq('dia_de_evento_id', id),
+    admin.from('participantes').select('id, email, nome'),
+  ])
 
-  if (erroP || erroR) {
+  if (erroC || erroP || erroR) {
+    logErro('/dia-de-evento/[id]/participantes', {erroC, erroP, erroR})
     return NextResponse.json({ erro: 'erro_interno' }, { status: 500 })
   }
 
-  const presencaMap = new Map(
-    (presencas ?? []).map(p => [p.participante_id, { id: p.id, registrada_em: p.registrada_em }])
-  )
+  // Mapas para lookup O(1)
+  const presencaPorEmail = new Map<string, { id: string; registrada_em: string }>()
+  const nomePorEmail = new Map<string, string | null>()
 
-  const resultado: ParticipanteComPresenca[] = (participantes ?? []).map(p => ({
-    ...p,
-    presenca: presencaMap.get(p.id) ?? null,
+  for (const part of participantes ?? []) {
+    nomePorEmail.set(part.email, part.nome)
+  }
+
+  // Cruza participante_id da presença com email via tabela participantes
+  const participanteById = new Map((participantes ?? []).map(p => [p.id, p]))
+  for (const p of presencas ?? []) {
+    const part = participanteById.get(p.participante_id)
+    if (part) presencaPorEmail.set(part.email, { id: p.id, registrada_em: p.registrada_em })
+  }
+
+  const resultado: ParticipanteComPresenca[] = (colaboradores ?? []).map(c => ({
+    id: c.id,
+    email: c.email,
+    nome: nomePorEmail.get(c.email) ?? null,
+    presenca: presencaPorEmail.get(c.email) ?? null,
   }))
 
   const totalPresentes = resultado.filter(p => p.presenca !== null).length

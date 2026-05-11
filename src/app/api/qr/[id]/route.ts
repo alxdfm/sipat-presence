@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { verificarOrganizador } from '@/lib/supabase/api-helpers'
-import { gerarQRCode } from '@/lib/qr/gerar-qr'
+import { verificarOrganizador, logErro} from '@/lib/supabase/api-helpers'
+import { gerarQRCode, gerarUrlPresenca } from '@/lib/qr/gerar-qr'
 
 /**
  * GET /api/qr/[id]
@@ -34,7 +34,10 @@ export async function GET(
     return NextResponse.json({ erro: 'dia_nao_ativado' }, { status: 422 })
   }
 
-  const qrCodeDataUrl = await gerarQRCode(dia.id, dia.codigo_do_dia)
+  const [qrCodeDataUrl, presencaUrl] = await Promise.all([
+    gerarQRCode(dia.id, dia.codigo_do_dia),
+    Promise.resolve(gerarUrlPresenca(dia.id, dia.codigo_do_dia)),
+  ])
 
-  return NextResponse.json({ qrCodeDataUrl })
+  return NextResponse.json({ qrCodeDataUrl, presencaUrl })
 }

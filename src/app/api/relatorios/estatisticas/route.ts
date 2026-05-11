@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { verificarOrganizador } from '@/lib/supabase/api-helpers'
+import { verificarOrganizador, logErro} from '@/lib/supabase/api-helpers'
 import { createAdminSupabase } from '@/lib/supabase/server'
 
 /**
@@ -24,6 +24,7 @@ export async function GET() {
   ])
 
   if (erroDias) {
+    logErro('/relatorios/estatisticas', erroDias)
     return NextResponse.json({ erro: 'erro_interno' }, { status: 500 })
   }
 

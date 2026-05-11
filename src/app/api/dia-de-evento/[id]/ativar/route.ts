@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { verificarOrganizador } from '@/lib/supabase/api-helpers'
+import { verificarOrganizador, logErro} from '@/lib/supabase/api-helpers'
 import { AtivarCodigoDoDiaPayload } from '@/types'
 
 /** Limite máximo de caracteres do CodigoDoDia para evitar dados malformados. */

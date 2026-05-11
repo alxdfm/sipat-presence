@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { verificarOrganizador } from '@/lib/supabase/api-helpers'
+import { verificarOrganizador, logErro} from '@/lib/supabase/api-helpers'
 import { createAdminSupabase } from '@/lib/supabase/server'
 
 /**
@@ -16,6 +16,7 @@ export async function GET() {
     .order('email', { ascending: true })
 
   if (error) {
+    logErro('/colaboradores-autorizados', error)
     return NextResponse.json({ erro: 'erro_interno' }, { status: 500 })
   }
 
@@ -59,6 +60,7 @@ export async function POST(request: NextRequest) {
     .select('id, email, criado_em')
 
   if (error) {
+    logErro('/colaboradores-autorizados', error)
     return NextResponse.json({ erro: 'erro_interno' }, { status: 500 })
   }
 

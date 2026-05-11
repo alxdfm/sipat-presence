@@ -1,6 +1,14 @@
 import { NextResponse } from 'next/server'
 import { createServerSupabase } from './server'
 
+/**
+ * Loga erros de API no console do servidor com rota e detalhes do erro.
+ * Em produção substitua por um serviço de observabilidade (Sentry, Datadog, etc.).
+ */
+export function logErro(rota: string, erro: unknown) {
+  console.error(`[API] ${rota}`, erro)
+}
+
 /** Cliente Supabase já resolvido — evita re-await nos callers. */
 type SupabaseClient = Awaited<ReturnType<typeof createServerSupabase>>
 

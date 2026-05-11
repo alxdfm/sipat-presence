@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminSupabase } from '@/lib/supabase/server'
-import { autenticarUsuario } from '@/lib/supabase/api-helpers'
+import { autenticarUsuario, logErro} from '@/lib/supabase/api-helpers'
 import { validarCodigoDoDia } from '@/lib/qr/codigo-do-dia'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { RegistrarPresencaPayload } from '@/types'
