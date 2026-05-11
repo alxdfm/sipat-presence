@@ -13,7 +13,7 @@ import { gerarQRCode, gerarUrlPresenca } from '@/lib/qr/gerar-qr'
  * @returns `{ qrCodeDataUrl: string }` ou erro 404/422/403.
  */
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
@@ -34,9 +34,10 @@ export async function GET(
     return NextResponse.json({ erro: 'dia_nao_ativado' }, { status: 422 })
   }
 
+  const origin = new URL(request.url).origin
   const [qrCodeDataUrl, presencaUrl] = await Promise.all([
-    gerarQRCode(dia.id, dia.codigo_do_dia),
-    Promise.resolve(gerarUrlPresenca(dia.id, dia.codigo_do_dia)),
+    gerarQRCode(dia.id, dia.codigo_do_dia, origin),
+    Promise.resolve(gerarUrlPresenca(dia.id, dia.codigo_do_dia, origin)),
   ])
 
   return NextResponse.json({ qrCodeDataUrl, presencaUrl })
