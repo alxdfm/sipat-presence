@@ -49,7 +49,7 @@ export async function GET(
       const part = Array.isArray(p.participantes) ? p.participantes[0] : p.participantes
       const nome = part?.nome ?? ''
       const email = part?.email ?? ''
-      const horario = new Date(p.registrada_em).toLocaleString('pt-BR')
+      const horario = new Date(p.registrada_em).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })
       return `"${nome}","${email}","${horario}"`
     }),
   ]

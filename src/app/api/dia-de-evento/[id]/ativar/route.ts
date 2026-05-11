@@ -57,8 +57,7 @@ export async function PATCH(
     return NextResponse.json({ erro: 'dia_nao_encontrado' }, { status: 404 })
   }
 
-  const hoje = new Date()
-  const hojeStr = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`
+  const hojeStr = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' })
 
   if (diaAtual.data < hojeStr) {
     return NextResponse.json({ erro: 'dia_no_passado' }, { status: 422 })
