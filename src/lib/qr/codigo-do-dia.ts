@@ -25,10 +25,11 @@ export function estaDentroJanela(
   // parts[2] pode ser undefined (formato HH:MM) ou NaN-safe via fallback
   const segundo = Number(parts[2] || '0')
 
-  // Cria data local explicitamente para evitar ambiguidade de timezone.
-  // new Date('YYYY-MM-DD') seria UTC midnight — setHours subsequente seria LOCAL,
-  // gerando inconsistência. Aqui tudo é construído em tempo local desde o início.
-  const abertura = new Date(ano, mes - 1, diaNum, hora, minuto, segundo, 0)
+  // hora_abertura é cadastrada no horário de Brasília (UTC-3).
+  // O servidor roda em UTC, então somamos 3h para converter BRT → UTC,
+  // mantendo a comparação consistente com new Date() que também é UTC.
+  const BRT_OFFSET_H = 3
+  const abertura = new Date(Date.UTC(ano, mes - 1, diaNum, hora + BRT_OFFSET_H, minuto, segundo))
   const fechamento = new Date(abertura.getTime() + dia.duracao_minutos * 60 * 1000)
 
   return agora >= abertura && agora <= fechamento
