@@ -1,6 +1,7 @@
 import { createServerSupabase } from '@/lib/supabase/server'
 import { createAdminSupabase } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import Image from 'next/image'
 import Link from 'next/link'
 import ColaboradoresAdminList from '@/components/colaboradores-admin-list'
 import { ColaboradorAutorizado } from '@/types'
@@ -41,6 +42,7 @@ export default async function AdminColaboradoresPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </Link>
+          <Image src="/cipa-logo-1.png" alt="CIPA" width={40} height={40} className="object-contain" />
           <div>
             <h1 className="text-2xl font-bold text-blue-900">Colaboradores Autorizados</h1>
             <p className="text-gray-500 text-sm">

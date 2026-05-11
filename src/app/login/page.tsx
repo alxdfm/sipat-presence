@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, Suspense } from 'react'
+import Image from 'next/image'
 import { createClientSupabase } from '@/lib/supabase/client'
 import { useSearchParams } from 'next/navigation'
 
@@ -26,9 +27,12 @@ function LoginContent() {
   return (
     <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 p-8">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-lg p-8 text-center">
+        <div className="flex justify-center mb-4">
+          <Image src="/cipa-logo-1.png" alt="CIPA" width={120} height={96} className="object-contain" />
+        </div>
         <h1 className="text-2xl font-bold text-blue-900 mb-2">Entrar</h1>
         <p className="text-gray-500 mb-8 text-sm">
-          Use sua conta Google corporativa para registrar sua presenca.
+          Use sua conta Google corporativa para registrar sua presença.
         </p>
         <button
           onClick={handleLoginGoogle}

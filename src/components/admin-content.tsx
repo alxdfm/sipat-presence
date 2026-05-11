@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { Participante, Evento, DiaDeEvento } from '@/types'
 import EventoForm from './evento-form'
@@ -11,6 +12,15 @@ import ParticipantesDia from './participantes-dia'
 import { useLogout } from '@/hooks/use-logout'
 import { useToast } from './toast'
 import { Spinner } from './spinner'
+
+function formatarData(iso: string) {
+  const [ano, mes, dia] = iso.split('-')
+  return `${dia}/${mes}/${ano}`
+}
+
+function formatarHora(hora: string) {
+  return hora.slice(0, 5)
+}
 
 const DIAS_POR_PAGINA = 5
 
@@ -187,9 +197,12 @@ export default function AdminContent({ participante, eventos: eventosIniciais }:
     <main className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-3xl mx-auto">
         <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-2xl font-bold text-blue-900">Painel do Organizador</h1>
-            <p className="text-gray-500 text-sm">{participante.email}</p>
+          <div className="flex items-center gap-3">
+            <Image src="/cipa-logo-1.png" alt="CIPA" width={48} height={48} className="object-contain" />
+            <div>
+              <h1 className="text-2xl font-bold text-blue-900">Painel do Organizador</h1>
+              <p className="text-gray-500 text-sm">{participante.email}</p>
+            </div>
           </div>
           <div className="flex items-center gap-4">
             <Link href="/admin/relatorios" className="text-sm text-blue-600 hover:text-blue-800 font-medium">
@@ -368,7 +381,7 @@ export default function AdminContent({ participante, eventos: eventosIniciais }:
                       /* Confirmação de exclusão do dia */
                       <div className="p-2 bg-red-50 border border-red-200 rounded">
                         <p className="text-sm text-red-700 font-medium mb-2">
-                          Excluir dia {dia.data}{dia.nome ? ` — ${dia.nome}` : ''}? Todas as presenças serão removidas.
+                          Excluir dia {formatarData(dia.data)}{dia.nome ? ` — ${dia.nome}` : ''}? Todas as presenças serão removidas.
                         </p>
                         <div className="flex gap-2">
                           <button
@@ -395,9 +408,9 @@ export default function AdminContent({ participante, eventos: eventosIniciais }:
                             {dia.nome && (
                               <p className="font-semibold text-gray-800">{dia.nome}</p>
                             )}
-                            <p className="font-medium text-gray-700">{dia.data}</p>
+                            <p className="font-medium text-gray-700">{formatarData(dia.data)}</p>
                             <p className="text-sm text-gray-500">
-                              Abertura: {dia.hora_abertura} · {dia.duracao_minutos} min
+                              Abertura: {formatarHora(dia.hora_abertura)} · {dia.duracao_minutos} min
                             </p>
                             <p className="text-sm mt-1">
                               {dia.codigo_do_dia

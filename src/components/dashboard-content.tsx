@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Image from 'next/image'
 import { Participante, PresencaEnriquecida } from '@/types'
 import CertificadoDiaButton from './certificado-dia-button'
 import { useLogout } from '@/hooks/use-logout'
@@ -44,9 +45,12 @@ export default function DashboardContent({ participante }: Props) {
     <main className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-2xl mx-auto">
         <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-2xl font-bold text-blue-900">Minha Área</h1>
-            <p className="text-gray-500 text-sm">{participante?.email}</p>
+          <div className="flex items-center gap-3">
+            <Image src="/cipa-logo-1.png" alt="CIPA" width={48} height={48} className="object-contain" />
+            <div>
+              <h1 className="text-2xl font-bold text-blue-900">Minha Área</h1>
+              <p className="text-gray-500 text-sm">{participante?.email}</p>
+            </div>
           </div>
           <button
             onClick={logout}

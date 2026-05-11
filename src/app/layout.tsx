@@ -3,7 +3,7 @@ import './globals.css'
 import { ToastProvider } from '@/components/toast'
 
 export const metadata: Metadata = {
-  title: 'SIPAT Presença',
+  title: 'SIPAT Vixting',
   description: 'Registro de presença em SIPAT com geração de certificado',
 }
 
