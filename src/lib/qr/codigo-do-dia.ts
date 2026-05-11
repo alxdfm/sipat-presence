@@ -18,18 +18,14 @@ export function estaDentroJanela(
   dia: Pick<DiaDeEvento, 'data' | 'hora_abertura' | 'duracao_minutos'>,
   agora: Date = new Date()
 ): boolean {
-  const [ano, mes, diaNum] = dia.data.split('-').map(Number)
   const parts = dia.hora_abertura.split(':')
-  const hora = Number(parts[0])
-  const minuto = Number(parts[1])
-  // parts[2] pode ser undefined (formato HH:MM) ou NaN-safe via fallback
-  const segundo = Number(parts[2] || '0')
+  const hora = parts[0].padStart(2, '0')
+  const minuto = parts[1].padStart(2, '0')
+  const segundo = (parts[2] ?? '00').padStart(2, '0')
 
-  // hora_abertura é cadastrada no horário de Brasília (UTC-3).
-  // O servidor roda em UTC, então somamos 3h para converter BRT → UTC,
-  // mantendo a comparação consistente com new Date() que também é UTC.
-  const BRT_OFFSET_H = 3
-  const abertura = new Date(Date.UTC(ano, mes - 1, diaNum, hora + BRT_OFFSET_H, minuto, segundo))
+  // hora_abertura é cadastrada no horário de Brasília (UTC-3, fixo desde 2019).
+  // Offset explícito garante conversão correta para UTC em qualquer servidor.
+  const abertura = new Date(`${dia.data}T${hora}:${minuto}:${segundo}-03:00`)
   const fechamento = new Date(abertura.getTime() + dia.duracao_minutos * 60 * 1000)
 
   return agora >= abertura && agora <= fechamento
