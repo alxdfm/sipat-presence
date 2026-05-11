@@ -65,8 +65,8 @@ export async function POST(request: NextRequest) {
   const diaValido = dias.find(d => validarCodigoDoDia(d, codigoDoDia).valido)
 
   if (!diaValido) {
-    // Código existe mas fora da janela
-    const motivo = validarCodigoDoDia(dias[0], codigoDoDia).motivo ?? 'fora_da_janela'
+    const resultado = validarCodigoDoDia(dias[0], codigoDoDia)
+    const motivo = !resultado.valido ? resultado.motivo : 'fora_da_janela'
     return NextResponse.json({ erro: motivo }, { status: 422 })
   }
 
