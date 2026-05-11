@@ -5,9 +5,6 @@ import Image from 'next/image'
 import { createClientSupabase } from '@/lib/supabase/client'
 import { useSearchParams } from 'next/navigation'
 
-/**
- * Conteudo interno da pagina de login, que usa useSearchParams.
- */
 function LoginContent() {
   const [carregando, setCarregando] = useState(false)
   const searchParams = useSearchParams()
@@ -27,13 +24,18 @@ function LoginContent() {
   return (
     <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 p-8">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-lg p-8 text-center">
-        <div className="flex justify-center mb-4">
-          <Image src="/cipa-logo-1.png" alt="CIPA" width={120} height={96} className="object-contain" />
+
+        <div className="flex items-center justify-center gap-6 mb-6">
+          <Image src="/cipa-logo-1.png" alt="CIPA" width={80} height={80} className="object-contain" />
+          <div className="w-px h-12 bg-gray-200" />
+          <Image src="/vixting-by-sankhya.png" alt="Vixting" width={120} height={40} className="object-contain" />
         </div>
-        <h1 className="text-2xl font-bold text-blue-900 mb-2">Entrar</h1>
-        <p className="text-gray-500 mb-8 text-sm">
+
+        <h1 className="text-2xl font-bold text-blue-900 mb-2">SIPAT Vixting 2026</h1>
+        <p className="text-gray-500 text-sm mb-8">
           Use sua conta Google corporativa para registrar sua presença.
         </p>
+
         <button
           onClick={handleLoginGoogle}
           disabled={carregando}
@@ -52,10 +54,6 @@ function LoginContent() {
   )
 }
 
-/**
- * Pagina de login via Google OAuth.
- * Preserva o parametro `redirectTo` para redirecionar apos autenticacao.
- */
 export default function LoginPage() {
   return (
     <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><p className="text-gray-500">Carregando...</p></div>}>

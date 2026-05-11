@@ -46,7 +46,8 @@ export default function DashboardContent({ participante }: Props) {
       <div className="max-w-2xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <div className="flex items-center gap-3">
-            <Image src="/cipa-logo-1.png" alt="CIPA" width={48} height={48} className="object-contain" />
+            <Image src="/cipa-logo-1.png" alt="CIPA" width={40} height={40} className="object-contain" />
+            <Image src="/vixting-by-sankhya.png" alt="Vixting" width={90} height={28} className="object-contain" />
             <div>
               <h1 className="text-2xl font-bold text-blue-900">Minha Área</h1>
               <p className="text-gray-500 text-sm">{participante?.email}</p>
