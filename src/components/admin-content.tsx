@@ -12,6 +12,12 @@ import ParticipantesDia from './participantes-dia'
 import { useLogout } from '@/hooks/use-logout'
 import { useToast } from './toast'
 import { Spinner } from './spinner'
+import {
+  atualizarEvento as atualizarEventoAction,
+  excluirEvento as excluirEventoAction,
+  atualizarDiaDeEvento as atualizarDiaDeEventoAction,
+  excluirDiaDeEvento as excluirDiaDeEventoAction,
+} from '@/lib/actions/evento'
 
 function formatarData(iso: string) {
   const [ano, mes, dia] = iso.split('-')
@@ -108,14 +114,9 @@ export default function AdminContent({ participante, eventos: eventosIniciais }:
     if (!editEventoNome.trim()) return
     setSalvandoEvento(true)
     try {
-      const res = await fetch(`/api/evento/${eventoId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nome: editEventoNome, descricao: editEventoDescricao || null }),
-      })
-      const json = await res.json()
-      if (!res.ok) { showToast('Erro ao salvar evento.', 'error'); return }
-      setEventos(prev => prev.map(e => e.id === eventoId ? { ...e, ...json.evento } : e))
+      const resultado = await atualizarEventoAction(eventoId, editEventoNome, editEventoDescricao || null)
+      if (!resultado.ok) { showToast('Erro ao salvar evento.', 'error'); return }
+      setEventos(prev => prev.map(e => e.id === eventoId ? { ...e, ...resultado.data } : e))
       setEventoEditando(null)
       showToast('Evento atualizado.', 'success')
     } catch {
@@ -128,8 +129,8 @@ export default function AdminContent({ participante, eventos: eventosIniciais }:
   async function excluirEvento(eventoId: string) {
     setExcluindoEvento(true)
     try {
-      const res = await fetch(`/api/evento/${eventoId}`, { method: 'DELETE' })
-      if (!res.ok) { showToast('Erro ao excluir evento.', 'error'); return }
+      const resultado = await excluirEventoAction(eventoId)
+      if (!resultado.ok) { showToast('Erro ao excluir evento.', 'error'); return }
       setEventos(prev => prev.filter(e => e.id !== eventoId))
       setEventoExcluindo(null)
       showToast('Evento excluído.', 'info')
@@ -152,22 +153,17 @@ export default function AdminContent({ participante, eventos: eventosIniciais }:
     if (!editDiaData || !editDiaHora) return
     setSalvandoDia(true)
     try {
-      const res = await fetch(`/api/dia-de-evento/${diaId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          nome: editDiaNome || null,
-          data: editDiaData,
-          horaAbertura: editDiaHora,
-          duracaoMinutos: parseInt(editDiaDuracao) || 60,
-        }),
+      const resultado = await atualizarDiaDeEventoAction(diaId, {
+        nome: editDiaNome || null,
+        data: editDiaData,
+        horaAbertura: editDiaHora,
+        duracaoMinutos: parseInt(editDiaDuracao) || 60,
       })
-      const json = await res.json()
-      if (!res.ok) { showToast('Erro ao salvar dia.', 'error'); return }
+      if (!resultado.ok) { showToast('Erro ao salvar dia.', 'error'); return }
       setEventos(prev =>
         prev.map(e => ({
           ...e,
-          dias_de_evento: e.dias_de_evento.map(d => d.id === diaId ? json.dia : d),
+          dias_de_evento: e.dias_de_evento.map(d => d.id === diaId ? resultado.data : d),
         }))
       )
       setDiaEditando(null)
@@ -182,8 +178,8 @@ export default function AdminContent({ participante, eventos: eventosIniciais }:
   async function excluirDia(eventoId: string, diaId: string) {
     setExcluindoDia(true)
     try {
-      const res = await fetch(`/api/dia-de-evento/${diaId}`, { method: 'DELETE' })
-      if (!res.ok) { showToast('Erro ao excluir dia.', 'error'); return }
+      const resultado = await excluirDiaDeEventoAction(diaId)
+      if (!resultado.ok) { showToast('Erro ao excluir dia.', 'error'); return }
       setEventos(prev =>
         prev.map(e =>
           e.id === eventoId

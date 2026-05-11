@@ -41,14 +41,22 @@ export async function GET(
   }
 
   const evento = Array.isArray(dia.eventos) ? dia.eventos[0] : dia.eventos
-  const nomeArquivo = `presencas_${dia.data}_${(dia.nome ?? evento?.nome ?? 'dia').replace(/\s+/g, '_')}.csv`
+  const nomeBase = (dia.nome ?? evento?.nome ?? 'dia').replace(/\s+/g, '_')
+  // Remove caracteres que quebram o header Content-Disposition
+  const nomeArquivo = `presencas_${dia.data}_${nomeBase.replace(/["\r\n;,]/g, '')}.csv`
+
+  // Escapa campo CSV: duplica aspas (RFC 4180) e neutraliza injeção de fórmulas
+  const escaparCsv = (valor: string): string => {
+    const escaped = valor.replace(/"/g, '""')
+    return /^[=+\-@\t\r]/.test(escaped) ? `'${escaped}` : escaped
+  }
 
   const linhas = [
     'Nome,Email,Horário de Registro',
     ...(presencas ?? []).map(p => {
       const part = Array.isArray(p.participantes) ? p.participantes[0] : p.participantes
-      const nome = part?.nome ?? ''
-      const email = part?.email ?? ''
+      const nome = escaparCsv(part?.nome ?? '')
+      const email = escaparCsv(part?.email ?? '')
       const horario = new Date(p.registrada_em).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })
       return `"${nome}","${email}","${horario}"`
     }),

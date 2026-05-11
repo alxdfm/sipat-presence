@@ -4,6 +4,7 @@ import { useState, FormEvent } from 'react'
 import { ColaboradorAutorizado } from '@/types'
 import { useToast } from './toast'
 import { Spinner } from './spinner'
+import { adicionarColaboradores, removerColaborador, atualizarColaborador } from '@/lib/actions/colaboradores'
 
 interface Props {
   colaboradoresIniciais: ColaboradorAutorizado[]
@@ -30,13 +31,8 @@ export default function ColaboradoresAdminList({ colaboradoresIniciais }: Props)
     setAdicionando(true)
 
     try {
-      const res = await fetch('/api/colaboradores-autorizados', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ emails }),
-      })
-      const json = await res.json()
-      if (!res.ok) {
+      const resultado = await adicionarColaboradores(emails)
+      if (!resultado.ok) {
         showToast('Erro ao adicionar colaboradores.', 'error')
         return
       }
@@ -46,7 +42,7 @@ export default function ColaboradoresAdminList({ colaboradoresIniciais }: Props)
       setColaboradores(jsonLista.colaboradores ?? [])
 
       setTextoEmails('')
-      const total = json.total ?? emails.length
+      const total = resultado.data.total
       showToast(`${total} colaborador${total !== 1 ? 'es' : ''} adicionado${total !== 1 ? 's' : ''}.`, 'success')
     } catch {
       showToast('Erro de conexão.', 'error')
@@ -58,8 +54,8 @@ export default function ColaboradoresAdminList({ colaboradoresIniciais }: Props)
   async function handleRemover(id: string, email: string) {
     setRemovendo(id)
     try {
-      const res = await fetch(`/api/colaboradores-autorizados/${id}`, { method: 'DELETE' })
-      if (!res.ok) {
+      const resultado = await removerColaborador(id)
+      if (!resultado.ok) {
         showToast('Erro ao remover colaborador.', 'error')
         return
       }
@@ -85,21 +81,16 @@ export default function ColaboradoresAdminList({ colaboradoresIniciais }: Props)
     }
     setSalvandoId(id)
     try {
-      const res = await fetch(`/api/colaboradores-autorizados/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      })
-      const json = await res.json()
-      if (!res.ok) {
-        if (json.erro === 'email_ja_cadastrado') {
+      const resultado = await atualizarColaborador(id, email)
+      if (!resultado.ok) {
+        if (resultado.erro === 'email_ja_cadastrado') {
           showToast('Esse e-mail já está na lista.', 'error')
         } else {
           showToast('Erro ao atualizar e-mail.', 'error')
         }
         return
       }
-      setColaboradores(prev => prev.map(c => c.id === id ? json.colaborador : c))
+      setColaboradores(prev => prev.map(c => c.id === id ? resultado.data : c))
       setEditandoId(null)
       showToast('E-mail atualizado.', 'success')
     } catch {

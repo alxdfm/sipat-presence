@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Participante } from '@/types'
+import { alterarRole } from '@/lib/actions/participantes'
 
 interface Props {
   participantesIniciais: Participante[]
@@ -21,25 +22,20 @@ export default function ParticipantesAdminList({ participantesIniciais, organiza
   const [carregandoId, setCarregandoId] = useState<string | null>(null)
   const [erro, setErro] = useState<string | null>(null)
 
-  async function alterarRole(id: string, novoRole: 'participante' | 'organizador') {
+  async function handleAlterarRole(id: string, novoRole: 'participante' | 'organizador') {
     setCarregandoId(id)
     setErro(null)
 
     try {
-      const res = await fetch(`/api/participantes/${id}/role`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ role: novoRole }),
-      })
-      const json = await res.json()
+      const resultado = await alterarRole(id, novoRole)
 
-      if (!res.ok) {
-        setErro(json.erro ?? 'Erro ao alterar role.')
+      if (!resultado.ok) {
+        setErro(resultado.erro ?? 'Erro ao alterar role.')
         return
       }
 
       setParticipantes(prev =>
-        prev.map(p => (p.id === id ? { ...p, role: json.participante.role } : p))
+        prev.map(p => (p.id === id ? { ...p, role: resultado.data.role } : p))
       )
     } finally {
       setCarregandoId(null)
@@ -76,7 +72,7 @@ export default function ParticipantesAdminList({ participantesIniciais, organiza
 
                 {!eEuMesmo && (
                   <button
-                    onClick={() => alterarRole(p.id, eOrganizador ? 'participante' : 'organizador')}
+                    onClick={() => handleAlterarRole(p.id, eOrganizador ? 'participante' : 'organizador')}
                     disabled={carregando}
                     className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-colors disabled:opacity-50 ${
                       eOrganizador

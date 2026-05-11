@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { createClientSupabase } from '@/lib/supabase/client'
+import { registrarPresenca } from '@/lib/actions/presenca'
 
 type Estado = 'verificando' | 'nao_autenticado' | 'registrando' | 'sucesso' | 'erro'
 type MotivoErro = 'codigo_incorreto' | 'fora_da_janela' | 'dia_nao_ativado' | 'dia_nao_encontrado' | 'email_nao_autorizado' | 'muitas_requisicoes' | 'erro_interno' | null
@@ -45,19 +46,13 @@ export default function PresencaContent() {
 
       setEstado('registrando')
 
-      const res = await fetch('/api/presenca', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ diaDeEventoId: diaId, codigoDoDia: code }),
-      })
+      const resultado = await registrarPresenca(diaId!, code!)
 
-      const json = await res.json()
-
-      if (res.status === 201 || res.status === 200) {
+      if (resultado.ok) {
         setEstado('sucesso')
       } else {
         setEstado('erro')
-        setMotivoErro(json.erro)
+        setMotivoErro(resultado.erro as MotivoErro)
       }
     }
 

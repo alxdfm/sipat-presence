@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, FormEvent } from 'react'
-import { Evento, CriarEventoPayload } from '@/types'
+import { Evento } from '@/types'
 import { useToast } from './toast'
+import { criarEvento } from '@/lib/actions/evento'
 
 interface Props {
   onEventoCriado: (evento: Evento) => void
@@ -24,18 +25,12 @@ export default function EventoForm({ onEventoCriado }: Props) {
     setEnviando(true)
 
     try {
-      const payload: CriarEventoPayload = { nome: nome.trim(), descricao: descricao.trim() || undefined }
-      const res = await fetch('/api/evento', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      })
-      const json = await res.json()
-      if (!res.ok) {
+      const resultado = await criarEvento(nome.trim(), descricao.trim() || undefined)
+      if (!resultado.ok) {
         showToast('Erro ao criar evento. Tente novamente.', 'error')
         return
       }
-      onEventoCriado(json.evento)
+      onEventoCriado(resultado.data)
       setNome('')
       setDescricao('')
       showToast('Evento criado com sucesso.', 'success')

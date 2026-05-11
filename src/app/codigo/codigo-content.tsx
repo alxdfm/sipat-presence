@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { createClientSupabase } from '@/lib/supabase/client'
+import { registrarPresencaPorCodigo } from '@/lib/actions/presenca'
 
 type Estado = 'aguardando' | 'registrando' | 'sucesso' | 'erro'
 type MotivoErro = 'codigo_incorreto' | 'fora_da_janela' | 'dia_nao_ativado' | 'email_nao_autorizado' | 'muitas_requisicoes' | 'erro_interno' | null
@@ -41,19 +42,13 @@ export default function CodigoContent() {
     setEstado('registrando')
     setMotivoErro(null)
 
-    const res = await fetch('/api/presenca/codigo', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ codigoDoDia: codigo.trim() }),
-    })
+    const resultado = await registrarPresencaPorCodigo(codigo.trim())
 
-    const json = await res.json()
-
-    if (res.status === 201 || res.status === 200) {
+    if (resultado.ok) {
       setEstado('sucesso')
     } else {
       setEstado('erro')
-      setMotivoErro(json.erro ?? null)
+      setMotivoErro(resultado.erro as MotivoErro ?? null)
     }
   }
 

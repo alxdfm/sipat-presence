@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, FormEvent } from 'react'
-import { AtivarCodigoDoDiaPayload, DiaDeEvento } from '@/types'
+import { DiaDeEvento } from '@/types'
 import { useToast } from './toast'
+import { ativarCodigoDoDia } from '@/lib/actions/evento'
 
 interface Props {
   diaId: string
@@ -24,22 +25,16 @@ export default function AtivarCodigoForm({ diaId, onAtivado }: Props) {
     setEnviando(true)
 
     try {
-      const payload: AtivarCodigoDoDiaPayload = { codigoDoDia: codigo.trim() }
-      const res = await fetch(`/api/dia-de-evento/${diaId}/ativar`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      })
-      const json = await res.json()
-      if (!res.ok) {
+      const resultado = await ativarCodigoDoDia(diaId, codigo.trim())
+      if (!resultado.ok) {
         const mensagens: Record<string, string> = {
           dia_no_passado: 'Não é possível ativar um dia que já passou.',
           dia_nao_encontrado: 'Dia não encontrado.',
         }
-        showToast(mensagens[json.erro] ?? 'Erro ao ativar código. Tente novamente.', 'error')
+        showToast(mensagens[resultado.erro] ?? 'Erro ao ativar código. Tente novamente.', 'error')
         return
       }
-      onAtivado(json.dia)
+      onAtivado(resultado.data)
       showToast('Código ativado com sucesso!', 'success')
     } catch {
       showToast('Erro de conexão. Tente novamente.', 'error')

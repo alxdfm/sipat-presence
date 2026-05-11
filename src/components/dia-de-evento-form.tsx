@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, FormEvent } from 'react'
-import { CriarDiaDeEventoPayload, DiaDeEvento } from '@/types'
+import { DiaDeEvento } from '@/types'
 import { useToast } from './toast'
+import { criarDiaDeEvento } from '@/lib/actions/evento'
 
 interface Props {
   eventoId: string
@@ -27,24 +28,18 @@ export default function DiaDeEventoForm({ eventoId, onDiaCriado }: Props) {
     setEnviando(true)
 
     try {
-      const payload: CriarDiaDeEventoPayload = {
+      const resultado = await criarDiaDeEvento({
         eventoId,
         nome: nome.trim() || undefined,
         data,
         horaAbertura,
         duracaoMinutos: parseInt(duracaoMinutos) || 60,
-      }
-      const res = await fetch('/api/dia-de-evento', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
       })
-      const json = await res.json()
-      if (!res.ok) {
+      if (!resultado.ok) {
         showToast('Erro ao criar dia. Tente novamente.', 'error')
         return
       }
-      onDiaCriado(json.dia)
+      onDiaCriado(resultado.data)
       setNome('')
       setData('')
       setHoraAbertura('')
