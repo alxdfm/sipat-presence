@@ -15,7 +15,7 @@ import QRCode from 'qrcode'
 export function gerarUrlPresenca(
   diaDeEventoId: string,
   codigoDoDia: string,
-  appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+  appUrl = process.env.NEXT_PUBLIC_APP_URL ?? (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000')
 ): string {
   const url = new URL('/presenca', appUrl)
   url.searchParams.set('dia', diaDeEventoId)
