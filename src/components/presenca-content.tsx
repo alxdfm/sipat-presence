@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { createClientSupabase } from '@/lib/supabase/client'
 import { registrarPresenca } from '@/lib/actions/presenca'
 
@@ -81,6 +82,9 @@ export default function PresencaContent() {
           </>
         ) : estado === 'sucesso' ? (
           <>
+            <div className="flex justify-center mb-4">
+              <Image src="/cipa-logo-1.png" alt="CIPA" width={72} height={72} className="object-contain" />
+            </div>
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
