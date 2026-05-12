@@ -109,6 +109,68 @@ function desenharRodape({ page, width, regular }: Recursos) {
   page.drawText(`Emitido em ${dataEmissao}`, { x: 30, y: 22, size: 8, font: regular, color: CINZA_M })
 }
 
+async function desenharAssinaturas(rec: Recursos, nomeParticipante: string): Promise<void> {
+  const { pdfDoc, page, bold, regular } = rec
+
+  const LEFT_CX  = 210
+  const RIGHT_CX = 632
+  const HALF_LEN = 100
+
+  const IMG_H    = 28
+  const IMG_BOT  = 89
+  const LINE_Y   = 86
+  const NAME_Y   = 73
+  const TITLE_Y  = 60
+
+  // ── Presidente (esquerda) ─────────────────────────────────────
+  const assinatura = await carregarImg(pdfDoc, '/president-signature.png')
+  if (assinatura) {
+    const imgW = Math.round((assinatura.width / assinatura.height) * IMG_H)
+    page.drawImage(assinatura, {
+      x: Math.round(LEFT_CX - imgW / 2),
+      y: IMG_BOT,
+      width: imgW,
+      height: IMG_H,
+    })
+  }
+
+  page.drawLine({
+    start: { x: LEFT_CX - HALF_LEN, y: LINE_Y },
+    end:   { x: LEFT_CX + HALF_LEN, y: LINE_Y },
+    thickness: 0.8, color: CINZA_M,
+  })
+
+  const nomePresidente  = 'Daniel Capucci'
+  const tituloPresidente = 'Presidente da CIPA'
+  page.drawText(nomePresidente, {
+    x: Math.round(LEFT_CX - bold.widthOfTextAtSize(nomePresidente, 9) / 2),
+    y: NAME_Y, size: 9, font: bold, color: CINZA_E,
+  })
+  page.drawText(tituloPresidente, {
+    x: Math.round(LEFT_CX - regular.widthOfTextAtSize(tituloPresidente, 8.5) / 2),
+    y: TITLE_Y, size: 8.5, font: regular, color: CINZA_M,
+  })
+
+  // ── Participante (direita) ────────────────────────────────────
+  page.drawLine({
+    start: { x: RIGHT_CX - HALF_LEN, y: LINE_Y },
+    end:   { x: RIGHT_CX + HALF_LEN, y: LINE_Y },
+    thickness: 0.8, color: CINZA_M,
+  })
+
+  const nomePart = nomeParticipante.length > 30
+    ? nomeParticipante.slice(0, 28) + '…'
+    : nomeParticipante
+  page.drawText(nomePart, {
+    x: Math.round(RIGHT_CX - bold.widthOfTextAtSize(nomePart, 9) / 2),
+    y: NAME_Y, size: 9, font: bold, color: CINZA_E,
+  })
+  page.drawText('Participante', {
+    x: Math.round(RIGHT_CX - regular.widthOfTextAtSize('Participante', 8.5) / 2),
+    y: TITLE_Y, size: 8.5, font: regular, color: CINZA_M,
+  })
+}
+
 /**
  * Gera o certificado de participação em um único dia da SIPAT.
  */
@@ -158,6 +220,7 @@ export async function gerarCertificadoDia(dados: DadosCertificadoDia): Promise<U
   centralizar('realizada de 18 a 22 de maio de 2026, organizada pela CIPA.',     BASE - 319, 10, regular, CINZA_M)
   centralizar(dados.nomeEvento, BASE - 334, 10, bold, CINZA_E)
 
+  await desenharAssinaturas(rec, dados.nomeParticipante)
   desenharRodape(rec)
   return rec.pdfDoc.save()
 }
@@ -224,6 +287,7 @@ export async function gerarCertificado(dados: DadosCertificado): Promise<Uint8Ar
   centralizar('Semana Interna de Prevenção de Acidentes do Trabalho — SIPAT', botLista - 18, 10, regular, CINZA_M)
   centralizar('18 a 22 de maio de 2026 — ' + dados.nomeEvento, botLista - 32, 10, bold, CINZA_E)
 
+  await desenharAssinaturas(rec, dados.nomeParticipante)
   desenharRodape(rec)
   return rec.pdfDoc.save()
 }
