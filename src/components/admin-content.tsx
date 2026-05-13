@@ -211,6 +211,9 @@ export default function AdminContent({ participante, eventos: eventosIniciais }:
             </div>
           </div>
           <div className="flex items-center gap-4">
+            <Link href="/admin/sorteio" className="text-sm text-blue-600 hover:text-blue-800 font-medium">
+              Sorteio
+            </Link>
             <Link href="/admin/relatorios" className="text-sm text-blue-600 hover:text-blue-800 font-medium">
               Relatórios
             </Link>
