@@ -104,3 +104,40 @@ export async function registrarPresencaPorCodigo(codigoDoDia: string): Promise<R
 
   return { ok: true }
 }
+
+export async function registrarPresencaManual(
+  colaboradorEmail: string,
+  diaDeEventoId: string
+): Promise<Resultado> {
+  const auth = await autenticarUsuario()
+  if (!auth.ok) return { ok: false, erro: 'nao_autenticado' }
+
+  const admin = createAdminSupabase()
+
+  const { data: organizador } = await admin
+    .from('participantes')
+    .select('role')
+    .eq('id', auth.usuario.id)
+    .single()
+
+  if (organizador?.role !== 'organizador') return { ok: false, erro: 'sem_permissao' }
+
+  const { data: participante } = await admin
+    .from('participantes')
+    .select('id')
+    .eq('email', colaboradorEmail)
+    .maybeSingle()
+
+  if (!participante) return { ok: false, erro: 'nao_cadastrado' }
+
+  const { error } = await admin
+    .from('presencas')
+    .insert({ participante_id: participante.id, dia_de_evento_id: diaDeEventoId })
+
+  if (error) {
+    if (error.code === '23505') return { ok: true, duplicada: true }
+    return { ok: false, erro: 'erro_interno' }
+  }
+
+  return { ok: true }
+}

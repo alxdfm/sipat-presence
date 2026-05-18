@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { ParticipanteComPresenca } from '@/types'
+import { registrarPresencaManual } from '@/lib/actions/presenca'
 
 interface Props {
   diaId: string
@@ -13,20 +14,18 @@ interface DadosDia {
   totalAusentes: number
 }
 
-/**
- * Componente expansível que exibe quais Participantes compareceram
- * e quais faltaram em um DiaDeEvento específico.
- *
- * Carrega os dados lazily ao expandir — evita N requisições desnecessárias
- * ao renderizar a lista de dias do admin.
- *
- * @param diaId - ID do DiaDeEvento cujos participantes serão listados.
- */
+function mensagemErro(erro: string) {
+  if (erro === 'nao_cadastrado') return 'Colaborador ainda não fez login no sistema'
+  return 'Erro ao registrar. Tente novamente.'
+}
+
 export default function ParticipantesDia({ diaId }: Props) {
   const [expandido, setExpandido] = useState(false)
   const [dados, setDados] = useState<DadosDia | null>(null)
   const [carregando, setCarregando] = useState(false)
   const [erro, setErro] = useState(false)
+  const [pendentes, setPendentes] = useState<Set<string>>(new Set())
+  const [errosRegistro, setErrosRegistro] = useState<Map<string, string>>(new Map())
 
   useEffect(() => {
     if (!expandido || dados) return
@@ -41,6 +40,33 @@ export default function ParticipantesDia({ diaId }: Props) {
       .catch(() => setErro(true))
       .finally(() => setCarregando(false))
   }, [expandido, diaId, dados])
+
+  async function registrar(email: string) {
+    setPendentes(prev => new Set(prev).add(email))
+    setErrosRegistro(prev => { const m = new Map(prev); m.delete(email); return m })
+
+    const resultado = await registrarPresencaManual(email, diaId)
+
+    setPendentes(prev => { const s = new Set(prev); s.delete(email); return s })
+
+    if (!resultado.ok) {
+      setErrosRegistro(prev => new Map(prev).set(email, resultado.erro))
+      return
+    }
+
+    setDados(prev => {
+      if (!prev) return prev
+      const agora = new Date().toISOString()
+      const atualizados = prev.participantes.map(p =>
+        p.email === email ? { ...p, presenca: { id: 'manual', registrada_em: agora } } : p
+      )
+      return {
+        participantes: atualizados,
+        totalPresentes: prev.totalPresentes + 1,
+        totalAusentes: prev.totalAusentes - 1,
+      }
+    })
+  }
 
   const presentes = dados?.participantes.filter(p => p.presenca !== null) ?? []
   const ausentes = dados?.participantes.filter(p => p.presenca === null) ?? []
@@ -83,8 +109,8 @@ export default function ParticipantesDia({ diaId }: Props) {
                     {presentes.map(p => (
                       <li key={p.id} className="flex items-center gap-2 text-sm">
                         <span className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0" />
-                        <span className="text-gray-700">{p.nome ?? p.email}</span>
-                        <span className="text-gray-400 text-xs truncate">{p.email}</span>
+                        <span className="text-gray-700 truncate">{p.nome ?? p.email}</span>
+                        {p.nome && <span className="text-gray-400 text-xs truncate">{p.email}</span>}
                       </li>
                     ))}
                   </ul>
@@ -100,10 +126,24 @@ export default function ParticipantesDia({ diaId }: Props) {
                 ) : (
                   <ul className="space-y-1">
                     {ausentes.map(p => (
-                      <li key={p.id} className="flex items-center gap-2 text-sm">
-                        <span className="w-2 h-2 rounded-full bg-red-300 flex-shrink-0" />
-                        <span className="text-gray-500">{p.nome ?? p.email}</span>
-                        <span className="text-gray-400 text-xs truncate">{p.email}</span>
+                      <li key={p.id} className="space-y-0.5">
+                        <div className="flex items-center gap-2 text-sm">
+                          <span className="w-2 h-2 rounded-full bg-red-300 flex-shrink-0" />
+                          <span className="text-gray-500 truncate flex-1 min-w-0">{p.nome ?? p.email}</span>
+                          {p.nome && <span className="text-gray-400 text-xs truncate hidden sm:block">{p.email}</span>}
+                          <button
+                            onClick={() => registrar(p.email)}
+                            disabled={pendentes.has(p.email)}
+                            className="ml-auto flex-shrink-0 text-xs bg-blue-600 text-white px-2.5 py-1 rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                          >
+                            {pendentes.has(p.email) ? 'Registrando…' : 'Registrar presença'}
+                          </button>
+                        </div>
+                        {errosRegistro.get(p.email) && (
+                          <p className="text-xs text-red-500 pl-4">
+                            {mensagemErro(errosRegistro.get(p.email)!)}
+                          </p>
+                        )}
                       </li>
                     ))}
                   </ul>
