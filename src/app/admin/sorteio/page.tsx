@@ -1,6 +1,6 @@
 import { createServerSupabase, createAdminSupabase } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import SorteioContent, { ColaboradorElegivel } from '@/components/sorteio-content'
+import SorteioContent, { ColaboradorElegivel, DiaSorteioInfo } from '@/components/sorteio-content'
 
 export default async function SorteioPage() {
   const supabase = await createServerSupabase()
@@ -17,11 +17,13 @@ export default async function SorteioPage() {
 
   const admin = createAdminSupabase()
 
-  const { data: presencas } = await admin
-    .from('presencas')
-    .select('participante_id, dia_de_evento_id, participantes(nome, email)')
+  const [{ data: presencas }, { data: diasRaw }] = await Promise.all([
+    admin.from('presencas').select('participante_id, dia_de_evento_id, participantes(nome, email)'),
+    admin.from('dias_de_evento').select('id, nome, data, eventos(nome)').order('data', { ascending: true }),
+  ])
 
   const mapa = new Map<string, { nome: string | null; email: string; dias: Set<string> }>()
+  const contagemPorDia = new Map<string, number>()
 
   for (const p of presencas ?? []) {
     const part = Array.isArray(p.participantes) ? p.participantes[0] : p.participantes
@@ -33,6 +35,7 @@ export default async function SorteioPage() {
     }
     entry.dias.add(p.dia_de_evento_id)
     mapa.set(p.participante_id, entry)
+    contagemPorDia.set(p.dia_de_evento_id, (contagemPorDia.get(p.dia_de_evento_id) ?? 0) + 1)
   }
 
   const elegiveis: ColaboradorElegivel[] = []
@@ -41,8 +44,18 @@ export default async function SorteioPage() {
       elegiveis.push({ participanteId, nome, email, totalDias: dias.size })
     }
   }
+  elegiveis.sort((a, b) => (b.totalDias ?? 0) - (a.totalDias ?? 0) || (a.nome ?? a.email).localeCompare(b.nome ?? b.email))
 
-  elegiveis.sort((a, b) => b.totalDias - a.totalDias || (a.nome ?? a.email).localeCompare(b.nome ?? b.email))
+  const diasParaSorteio: DiaSorteioInfo[] = (diasRaw ?? []).map(d => {
+    const ev = Array.isArray(d.eventos) ? d.eventos[0] : d.eventos
+    return {
+      id: d.id,
+      nome: d.nome ?? null,
+      data: d.data,
+      nomeEvento: (ev as { nome: string } | null)?.nome ?? '',
+      totalPresentes: contagemPorDia.get(d.id) ?? 0,
+    }
+  })
 
-  return <SorteioContent elegiveis={elegiveis} />
+  return <SorteioContent elegiveis={elegiveis} diasParaSorteio={diasParaSorteio} />
 }

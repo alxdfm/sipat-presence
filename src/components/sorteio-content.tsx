@@ -8,11 +8,25 @@ export interface ColaboradorElegivel {
   participanteId: string
   nome: string | null
   email: string
-  totalDias: number
+  totalDias?: number
+}
+
+export interface DiaSorteioInfo {
+  id: string
+  nome: string | null
+  data: string
+  nomeEvento: string
+  totalPresentes: number
 }
 
 interface Props {
   elegiveis: ColaboradorElegivel[]
+  titulo?: string
+  subtitulo?: string
+  backHref?: string
+  backLabel?: string
+  csvNomeArquivo?: string
+  diasParaSorteio?: DiaSorteioInfo[]
 }
 
 type Fase = 'idle' | 'rolando' | 'concluido'
@@ -24,7 +38,20 @@ const PASSOS = [
   540, 650,
 ]
 
-export default function SorteioContent({ elegiveis }: Props) {
+function formatarData(iso: string) {
+  const [ano, mes, dia] = iso.split('-')
+  return `${dia}/${mes}/${ano}`
+}
+
+export default function SorteioContent({
+  elegiveis,
+  titulo = 'Sorteio',
+  subtitulo,
+  backHref = '/admin',
+  backLabel = '← Voltar ao painel',
+  csvNomeArquivo = 'elegiveis_sorteio.csv',
+  diasParaSorteio,
+}: Props) {
   const { showToast } = useToast()
   const [fase, setFase] = useState<Fase>('idle')
   const [candidato, setCandidato] = useState<ColaboradorElegivel | null>(null)
@@ -32,20 +59,27 @@ export default function SorteioContent({ elegiveis }: Props) {
   const [frameKey, setFrameKey] = useState(0)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+  const subtituloResolvido = subtitulo ?? `${elegiveis.length} colaborador${elegiveis.length !== 1 ? 'es elegíveis' : ' elegível'} (≥ 3 dias de presença)`
+
   function exportarCsv() {
     const esc = (v: string) => {
       const s = v.replace(/"/g, '""')
       return /^[=+\-@\t\r]/.test(s) ? `'${s}` : s
     }
+    const temDias = elegiveis.some(e => e.totalDias !== undefined)
     const linhas = [
-      'Nome,Email,Dias de Presença',
-      ...elegiveis.map(e => `"${esc(e.nome ?? '')}","${esc(e.email)}","${e.totalDias}"`),
+      temDias ? 'Nome,Email,Dias de Presença' : 'Nome,Email',
+      ...elegiveis.map(e =>
+        temDias
+          ? `"${esc(e.nome ?? '')}","${esc(e.email)}","${e.totalDias ?? ''}"`
+          : `"${esc(e.nome ?? '')}","${esc(e.email)}"`,
+      ),
     ]
     const blob = new Blob([linhas.join('\n')], { type: 'text/csv;charset=utf-8;' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = 'elegiveis_sorteio.csv'
+    a.download = csvNomeArquivo
     a.click()
     URL.revokeObjectURL(url)
   }
@@ -106,13 +140,11 @@ export default function SorteioContent({ elegiveis }: Props) {
           {/* Cabeçalho */}
           <div className="flex justify-between items-center mb-8">
             <div>
-              <h1 className="text-2xl font-bold text-blue-900">Sorteio</h1>
-              <p className="text-gray-500 text-sm">
-                {elegiveis.length} colaborador{elegiveis.length !== 1 ? 'es elegíveis' : ' elegível'} (≥ 3 dias de presença)
-              </p>
+              <h1 className="text-2xl font-bold text-blue-900">{titulo}</h1>
+              <p className="text-gray-500 text-sm">{subtituloResolvido}</p>
             </div>
-            <Link href="/admin" className="text-sm text-blue-600 hover:text-blue-800 font-medium">
-              ← Voltar ao painel
+            <Link href={backHref} className="text-sm text-blue-600 hover:text-blue-800 font-medium">
+              {backLabel}
             </Link>
           </div>
 
@@ -142,9 +174,11 @@ export default function SorteioContent({ elegiveis }: Props) {
                   {candidato.nome && (
                     <p className="text-sm text-amber-700 mt-2">{candidato.email}</p>
                   )}
-                  <p className="text-sm font-semibold text-amber-800 mt-1">
-                    {candidato.totalDias} dias de presença
-                  </p>
+                  {candidato.totalDias !== undefined && (
+                    <p className="text-sm font-semibold text-amber-800 mt-1">
+                      {candidato.totalDias} dias de presença
+                    </p>
+                  )}
                 </div>
               ) : (
                 <div className="relative">
@@ -235,17 +269,50 @@ export default function SorteioContent({ elegiveis }: Props) {
                           <p className="text-xs text-gray-500 truncate">{e.email}</p>
                         )}
                       </div>
-                      <span className={`ml-4 flex-shrink-0 text-xs font-semibold px-2.5 py-1 rounded-full ${
-                        eVencedor ? 'bg-amber-100 text-amber-700' : 'bg-blue-50 text-blue-700'
-                      }`}>
-                        {e.totalDias} dias
-                      </span>
+                      {e.totalDias !== undefined && (
+                        <span className={`ml-4 flex-shrink-0 text-xs font-semibold px-2.5 py-1 rounded-full ${
+                          eVencedor ? 'bg-amber-100 text-amber-700' : 'bg-blue-50 text-blue-700'
+                        }`}>
+                          {e.totalDias} dias
+                        </span>
+                      )}
                     </li>
                   )
                 })}
               </ul>
             )}
           </div>
+
+          {/* Sorteio por dia */}
+          {diasParaSorteio && diasParaSorteio.length > 0 && (
+            <div className="bg-white rounded-xl shadow-sm p-6 mt-6">
+              <h2 className="font-semibold text-gray-800 mb-4">Sorteio por dia</h2>
+              <ul className="divide-y">
+                {diasParaSorteio.map(dia => (
+                  <li key={dia.id} className="py-3 flex items-center justify-between gap-4">
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-gray-800 truncate">
+                        {dia.nome ?? formatarData(dia.data)}
+                        {dia.nome && (
+                          <span className="text-gray-400 font-normal"> · {formatarData(dia.data)}</span>
+                        )}
+                      </p>
+                      <p className="text-xs text-gray-500 truncate">{dia.nomeEvento}</p>
+                    </div>
+                    <div className="flex items-center gap-3 flex-shrink-0">
+                      <span className="text-xs text-gray-500">{dia.totalPresentes} presente{dia.totalPresentes !== 1 ? 's' : ''}</span>
+                      <Link
+                        href={`/admin/sorteio/dia/${dia.id}`}
+                        className="text-xs bg-blue-700 text-white px-3 py-1.5 rounded-lg hover:bg-blue-800 font-medium"
+                      >
+                        Sortear
+                      </Link>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
         </div>
       </main>
