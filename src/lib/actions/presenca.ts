@@ -122,13 +122,20 @@ export async function registrarPresencaManual(
 
   if (organizador?.role !== 'organizador') return { ok: false, erro: 'sem_permissao' }
 
-  const { data: participante } = await admin
+  let { data: participante } = await admin
     .from('participantes')
     .select('id')
     .eq('email', colaboradorEmail)
     .maybeSingle()
 
-  if (!participante) return { ok: false, erro: 'nao_cadastrado' }
+  if (!participante) {
+    const { data: novoUser, error: erroUser } = await admin.auth.admin.createUser({
+      email: colaboradorEmail,
+      email_confirm: true,
+    })
+    if (erroUser || !novoUser.user) return { ok: false, erro: 'erro_interno' }
+    participante = { id: novoUser.user.id }
+  }
 
   const { error } = await admin
     .from('presencas')

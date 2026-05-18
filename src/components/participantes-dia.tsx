@@ -14,8 +14,7 @@ interface DadosDia {
   totalAusentes: number
 }
 
-function mensagemErro(erro: string) {
-  if (erro === 'nao_cadastrado') return 'Colaborador ainda não fez login no sistema'
+function mensagemErro(_erro: string) {
   return 'Erro ao registrar. Tente novamente.'
 }
 
